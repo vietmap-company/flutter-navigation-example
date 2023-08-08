@@ -39,6 +39,8 @@ pubspec.lock
 **/ios/Runner/Info.plist
 vietmap_map
 vietmap_map.pub
+vm_deploy
+vm_deploy.pub
 
 # Symbolication related
 app.*.symbols
