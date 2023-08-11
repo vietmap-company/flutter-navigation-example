@@ -100,6 +100,19 @@ class _SearchAddressHeaderState extends State<SearchAddressHeader> {
                             color: Colors.black54,
                           ),
                         ),
+                        suffixIcon: _controller.text.isEmpty
+                            ? const SizedBox.shrink()
+                            : InkWell(
+                                onTap: () {
+                                  setState(() {
+                                    _controller.clear();
+                                  });
+                                },
+                                child: const Icon(
+                                  Icons.clear_rounded,
+                                  color: Colors.black54,
+                                ),
+                              ),
                         hintText: 'Nhập từ khoá để tìm kiếm',
                         contentPadding: const EdgeInsets.only(top: 15),
                         hintStyle: const TextStyle(

@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -22,8 +23,22 @@ class MapScreen extends StatefulWidget {
 class _MapScreenState extends State<MapScreen> {
   VietmapController? _controller;
   List<Marker> _markers = [];
+  List<Marker> _marker2 = [
+    Marker(
+        width: 40,
+        height: 40,
+        alignment: Alignment.bottomCenter,
+        latLng: const LatLng(10.784617, 106.675957),
+        child: const Icon(Icons.location_pin, size: 40, color: Colors.red)),
+    Marker(
+        width: 40,
+        height: 40,
+        alignment: Alignment.bottomCenter,
+        latLng: const LatLng(10.748444, 106.734322),
+        child: const Icon(Icons.location_pin, size: 40, color: Colors.red)),
+  ];
   double panelPosition = 0.0;
-
+  bool isShowMarker = true;
   final PanelController _panelController = PanelController();
   @override
   void initState() {
@@ -90,24 +105,35 @@ class _MapScreenState extends State<MapScreen> {
             body: Stack(
               children: [
                 VietmapGL(
-                    trackCameraPosition: true,
-                    styleString: AppContext.getVietmapMapStyleUrl() ?? "",
-                    initialCameraPosition: const CameraPosition(
-                        target: LatLng(10.762201, 106.654213), zoom: 10),
-                    onMapCreated: (controller) {
-                      setState(() {
-                        _controller = controller;
-                      });
-                    }),
+                  myLocationEnabled: true,
+                  myLocationTrackingMode: MyLocationTrackingMode.TrackingGPS,
+                  myLocationRenderMode: MyLocationRenderMode.NORMAL,
+                  trackCameraPosition: true,
+                  compassViewMargins: const Point(10, 90),
+                  styleString: AppContext.getVietmapMapStyleUrl() ?? "",
+                  initialCameraPosition: const CameraPosition(
+                      target: LatLng(10.762201, 106.654213), zoom: 10),
+                  onMapCreated: (controller) {
+                    setState(() {
+                      _controller = controller;
+                    });
+                  },
+                ),
                 _controller == null
                     ? const SizedBox.shrink()
                     : MarkerLayer(
                         mapController: _controller!,
                         markers: _markers,
                       ),
+                // _controller == null || !isShowMarker
+                //     ? const SizedBox.shrink()
+                //     : MarkerLayer(
+                //         mapController: _controller!,
+                //         markers: _marker2,
+                //       ),
                 Positioned(
                   key: const Key('searchBarKey'),
-                  top: 30,
+                  top: MediaQuery.of(context).viewPadding.top,
                   child: InkWell(
                     onTap: () {
                       Navigator.pushNamed(context, Routes.searchScreen);
@@ -160,11 +186,25 @@ class _MapScreenState extends State<MapScreen> {
               ],
             ),
             floatingActionButton: panelPosition == 0.0
-                ? FloatingActionButton(
-                    onPressed: () {
-                      Navigator.pushNamed(context, Routes.routingScreen);
-                    },
-                    child: const Icon(Icons.directions),
+                ? Column(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      // FloatingActionButton(
+                      //   onPressed: () {
+                      //     setState(() {
+                      //       isShowMarker = !isShowMarker;
+                      //     });
+                      //   },
+                      //   child: const Icon(Icons.show_chart),
+                      // ),
+                      const SizedBox(height: 10),
+                      FloatingActionButton(
+                        onPressed: () {
+                          Navigator.pushNamed(context, Routes.routingScreen);
+                        },
+                        child: const Icon(Icons.route),
+                      ),
+                    ],
                   )
                 : const SizedBox.shrink()),
       ),

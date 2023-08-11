@@ -151,6 +151,7 @@ class _NavigationScreenState extends State<NavigationScreen> {
                     _isRunning = false;
                   });
                   showDialog(
+                      barrierDismissible: false,
                       context: context,
                       builder: (_) => AlertDialog(
                             title: const Text('Thông báo'),
@@ -158,6 +159,7 @@ class _NavigationScreenState extends State<NavigationScreen> {
                             actions: [
                               TextButton(
                                   onPressed: () {
+                                    Navigator.pop(context);
                                     Navigator.pop(context);
                                   },
                                   child: const Text('OK'))

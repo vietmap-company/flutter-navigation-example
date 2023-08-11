@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.0.0+2
+version: 1.0.0+6
 
 environment:
   sdk: '>=2.19.6 <3.0.0'
@@ -43,10 +43,7 @@ dependencies:
   flutter_polyline_points: ^1.0.0
   equatable: ^2.0.5
   vietmap_flutter_navigation: ^1.1.1
-  vietmap_flutter_gl: 
-    git:
-      url: https://github.com/vietmap-company/flutter-map-sdk
-      ref: modify_interface
+  vietmap_flutter_gl: ^1.0.6
 
 
   # The following adds the Cupertino Icons font to your application.
@@ -85,6 +82,7 @@ flutter:
     - assets/images/
     - assets/svg/
     - assets/navigation_symbol/
+    - shorebird.yaml
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
