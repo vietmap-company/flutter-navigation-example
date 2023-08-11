@@ -1,6 +1,7 @@
 import 'dart:developer';
 import 'dart:io';
 
+import 'package:geolocator/geolocator.dart';
 import 'package:vietmap_map/di/app_context.dart';
 import 'package:vietmap_map/domain/entities/vietmap_routing_params.dart';
 
@@ -25,8 +26,8 @@ import '../../core/failures/exception_failure.dart';
 
 class VietmapApiRepositories implements VietmapApiRepository {
   late Dio _dio;
-  String baseUrl =AppContext.getVietmapBaseUrl()??'https://api.vietmap.vn/';
-  String apiKey = AppContext.getVietmapAPIKey()??'';
+  String baseUrl = AppContext.getVietmapBaseUrl() ?? 'https://api.vietmap.vn/';
+  String apiKey = AppContext.getVietmapAPIKey() ?? '';
   VietmapApiRepositories() {
     _dio = Dio(BaseOptions(baseUrl: baseUrl));
 
@@ -67,8 +68,12 @@ class VietmapApiRepositories implements VietmapApiRepository {
   Future<Either<Failure, List<VietmapAutocompleteModel>>> searchLocation(
       String keySearch) async {
     try {
-      var res = await _dio.get('autocomplete/v3',
-          queryParameters: {'apikey': apiKey, 'text': keySearch});
+      var location = await Geolocator.getCurrentPosition();
+      var res = await _dio.get('autocomplete/v3', queryParameters: {
+        'apikey': apiKey,
+        'text': keySearch,
+        'focus': location.toLatLng().toUrlValue()
+      });
 
       if (res.statusCode == 200) {
         var data = List<VietmapAutocompleteModel>.from(
