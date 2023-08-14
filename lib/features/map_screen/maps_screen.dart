@@ -1,4 +1,3 @@
-import 'dart:developer';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -7,9 +6,11 @@ import 'package:geolocator/geolocator.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'package:vietmap_flutter_gl/vietmap_flutter_gl.dart';
 
+import '../../constants/colors.dart';
 import '../../constants/route.dart';
 import '../../di/app_context.dart';
 import 'bloc/map_bloc.dart';
+import 'bloc/map_event.dart';
 import 'bloc/map_state.dart';
 import 'components/bottom_info.dart';
 
@@ -23,20 +24,6 @@ class MapScreen extends StatefulWidget {
 class _MapScreenState extends State<MapScreen> {
   VietmapController? _controller;
   List<Marker> _markers = [];
-  List<Marker> _marker2 = [
-    Marker(
-        width: 40,
-        height: 40,
-        alignment: Alignment.bottomCenter,
-        latLng: const LatLng(10.784617, 106.675957),
-        child: const Icon(Icons.location_pin, size: 40, color: Colors.red)),
-    Marker(
-        width: 40,
-        height: 40,
-        alignment: Alignment.bottomCenter,
-        latLng: const LatLng(10.748444, 106.734322),
-        child: const Icon(Icons.location_pin, size: 40, color: Colors.red)),
-  ];
   double panelPosition = 0.0;
   bool isShowMarker = true;
   final PanelController _panelController = PanelController();
@@ -59,7 +46,32 @@ class _MapScreenState extends State<MapScreen> {
   Widget build(BuildContext context) {
     return BlocListener<MapBloc, MapState>(
       listener: (_, state) {
-        if (state is MapStateGetPlaceDetailSuccess &&
+        if (state is MapStateGetLocationFromCoordinateSuccess &&
+            ModalRoute.of(context)?.isCurrent == true) {
+          _markers = [
+            Marker(
+                width: 40,
+                height: 40,
+                alignment: Alignment.bottomCenter,
+                latLng:
+                    LatLng(state.response.lat ?? 0, state.response.lng ?? 0),
+                child: InkWell(
+                  onTap: () {
+                    _panelController.show();
+                    _showPanel();
+                  },
+                  child: const Icon(Icons.location_pin,
+                      size: 40, color: Colors.red),
+                )),
+          ];
+          _controller?.animateCamera(
+            CameraUpdate.newLatLngZoom(
+                LatLng(state.response.lat ?? 0, state.response.lng ?? 0), 15),
+          );
+          _panelController.show();
+          _showPanel();
+        }
+        if ((state is MapStateGetPlaceDetailSuccess) &&
             ModalRoute.of(context)?.isCurrent == true) {
           _markers = [
             Marker(
@@ -89,7 +101,7 @@ class _MapScreenState extends State<MapScreen> {
           _controller?.addPolyline(PolylineOptions(
             geometry: state.listPoint,
             polylineWidth: 4,
-            polylineColor: Colors.blue,
+            polylineColor: vietmapColor,
           ));
         }
       },
@@ -106,7 +118,8 @@ class _MapScreenState extends State<MapScreen> {
               children: [
                 VietmapGL(
                   myLocationEnabled: true,
-                  myLocationTrackingMode: MyLocationTrackingMode.TrackingGPS,
+                  myLocationTrackingMode:
+                      MyLocationTrackingMode.TrackingCompass,
                   myLocationRenderMode: MyLocationRenderMode.NORMAL,
                   trackCameraPosition: true,
                   compassViewMargins: const Point(10, 90),
@@ -118,6 +131,11 @@ class _MapScreenState extends State<MapScreen> {
                       _controller = controller;
                     });
                   },
+                  onMapLongClick: (point, coordinates) {
+                    context
+                        .read<MapBloc>()
+                        .add(MapEventOnUserLongTapOnMap(coordinates));
+                  },
                 ),
                 _controller == null
                     ? const SizedBox.shrink()
@@ -125,12 +143,6 @@ class _MapScreenState extends State<MapScreen> {
                         mapController: _controller!,
                         markers: _markers,
                       ),
-                // _controller == null || !isShowMarker
-                //     ? const SizedBox.shrink()
-                //     : MarkerLayer(
-                //         mapController: _controller!,
-                //         markers: _marker2,
-                //       ),
                 Positioned(
                   key: const Key('searchBarKey'),
                   top: MediaQuery.of(context).viewPadding.top,
@@ -158,7 +170,7 @@ class _MapScreenState extends State<MapScreen> {
                               height: 25,
                             ),
                             const SizedBox(width: 10),
-                            const Text('Nhập từ khoá để tìm kiếm'),
+                            const Text('Nhập từ khoá để tìm kiếm')
                           ],
                         ),
                       ),
@@ -189,20 +201,12 @@ class _MapScreenState extends State<MapScreen> {
                 ? Column(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      // FloatingActionButton(
-                      //   onPressed: () {
-                      //     setState(() {
-                      //       isShowMarker = !isShowMarker;
-                      //     });
-                      //   },
-                      //   child: const Icon(Icons.show_chart),
-                      // ),
                       const SizedBox(height: 10),
                       FloatingActionButton(
                         onPressed: () {
                           Navigator.pushNamed(context, Routes.routingScreen);
                         },
-                        child: const Icon(Icons.route),
+                        child: const Icon(Icons.directions),
                       ),
                     ],
                   )

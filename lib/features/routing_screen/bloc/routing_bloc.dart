@@ -35,8 +35,10 @@ class RoutingBloc extends Bloc<RoutingEvent, RoutingState> {
           listPoint: <LatLng>[...(state.listPoint ?? [])],
           routingModel: VietMapRoutingModel.copyWith(state.routingModel),
           routingParams: params));
-      add(RoutingEventGetDirection(
-          from: params.originPoint!, to: params.destinationPoint!));
+      if (params.originPoint != null && params.destinationPoint != null) {
+        add(RoutingEventGetDirection(
+            from: params.originPoint!, to: params.destinationPoint!));
+      }
     }
   }
 
