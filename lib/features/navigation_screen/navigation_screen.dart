@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 
 import 'package:flutter_svg/svg.dart';
-import 'package:vietmap_flutter_gl/vietmap_flutter_gl.dart';
 
 import 'package:vietmap_flutter_navigation/navigation_plugin.dart';
 import 'package:vietmap_flutter_navigation/embedded/controller.dart';
@@ -12,8 +11,11 @@ import 'package:vietmap_flutter_navigation/models/way_point.dart';
 import 'package:vietmap_flutter_navigation/views/banner_instruction.dart';
 import 'package:vietmap_flutter_navigation/views/bottom_action.dart';
 import 'package:vietmap_flutter_navigation/views/navigation_view.dart';
+import 'package:vietmap_map/constants/colors.dart';
 import 'package:vietmap_map/di/app_context.dart';
 import 'package:vietmap_map/extension/driving_profile_extension.dart';
+import 'package:vietmap_map/features/navigation_screen/components/vietmap_banner_instruction_view.dart';
+import 'package:vietmap_map/features/navigation_screen/components/vietmap_bottom_view.dart';
 import 'package:vietmap_map/features/navigation_screen/models/navigation_params.dart';
 
 class NavigationScreen extends StatefulWidget {
@@ -36,7 +38,6 @@ class _NavigationScreenState extends State<NavigationScreen> {
   String guideDirection = "";
   Widget recenterButton = const SizedBox.shrink();
   RouteProgressEvent? routeProgressEvent;
-  bool _isRouteBuilt = false;
   bool _isRunning = false;
   FocusNode focusNode = FocusNode();
   @override
@@ -135,7 +136,6 @@ class _NavigationScreenState extends State<NavigationScreen> {
                 onRouteBuilt: (p0) {
                   setState(() {
                     EasyLoading.dismiss();
-                    _isRouteBuilt = true;
                   });
                 },
                 onRouteProgressChange: (RouteProgressEvent routeProgressEvent) {
@@ -170,13 +170,13 @@ class _NavigationScreenState extends State<NavigationScreen> {
               Positioned(
                   top: MediaQuery.of(context).viewPadding.top,
                   left: 0,
-                  child: BannerInstructionView(
+                  child: VietmapBannerInstructionView(
                     routeProgressEvent: routeProgressEvent,
                     instructionIcon: instructionImage,
                   )),
               Positioned(
                   bottom: 0,
-                  child: BottomActionView(
+                  child: VietmapBottomActionView(
                     recenterButton: recenterButton,
                     controller: _controller,
                     onOverviewCallback: _showRecenterButton,
@@ -212,12 +212,12 @@ class _NavigationScreenState extends State<NavigationScreen> {
               children: const [
                 Icon(
                   Icons.keyboard_double_arrow_up_sharp,
-                  color: Colors.lightBlue,
                   size: 35,
+                  color: vietmapColor,
                 ),
                 Text(
                   'Về giữa',
-                  style: TextStyle(fontSize: 18, color: Colors.lightBlue),
+                  style: TextStyle(fontSize: 18, color: vietmapColor),
                 )
               ],
             )));

@@ -1,7 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:vietmap_map/domain/entities/vietmap_routing_params.dart';
-import 'package:vietmap_map/extension/string_extension.dart';
+
+import '../../../constants/colors.dart';
 
 class VehicleButton extends StatelessWidget {
   const VehicleButton(
@@ -23,11 +24,11 @@ class VehicleButton extends StatelessWidget {
         height: 40,
         decoration: BoxDecoration(
             color: vehicleType == currentVehicleType
-                ? CupertinoColors.activeBlue.withOpacity(0.1)
+                ? vietmapColor.withOpacity(0.1)
                 : CupertinoColors.white,
             border: Border.all(
                 color: vehicleType == currentVehicleType
-                    ? CupertinoColors.activeBlue.withOpacity(0.5)
+                    ? vietmapColor.withOpacity(0.5)
                     : CupertinoColors.black.withOpacity(0.1)),
             borderRadius: BorderRadius.circular(40)),
         child: CupertinoButton(
@@ -49,7 +50,7 @@ class VehicleButton extends StatelessWidget {
           children: [
             Icon(Icons.directions_car_rounded,
                 color: vehicleType == currentVehicleType
-                    ? CupertinoColors.activeBlue
+                    ? vietmapColor
                     : CupertinoColors.black),
             vehicleType == currentVehicleType &&
                     estimatedTime?.isNotEmpty == true
@@ -65,7 +66,7 @@ class VehicleButton extends StatelessWidget {
           children: [
             Icon(Icons.directions_bike_rounded,
                 color: vehicleType == currentVehicleType
-                    ? CupertinoColors.activeBlue
+                    ? vietmapColor
                     : CupertinoColors.black),
             vehicleType == currentVehicleType &&
                     estimatedTime?.isNotEmpty == true
@@ -81,7 +82,7 @@ class VehicleButton extends StatelessWidget {
           children: [
             Icon(Icons.directions_walk_rounded,
                 color: vehicleType == currentVehicleType
-                    ? CupertinoColors.activeBlue
+                    ? vietmapColor
                     : CupertinoColors.black),
             vehicleType == currentVehicleType &&
                     estimatedTime?.isNotEmpty == true
@@ -97,7 +98,7 @@ class VehicleButton extends StatelessWidget {
           children: [
             Icon(Icons.motorcycle_rounded,
                 color: vehicleType == currentVehicleType
-                    ? CupertinoColors.activeBlue
+                    ? vietmapColor
                     : CupertinoColors.black),
             vehicleType == currentVehicleType &&
                     estimatedTime?.isNotEmpty == true

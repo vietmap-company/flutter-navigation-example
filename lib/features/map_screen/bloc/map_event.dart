@@ -22,3 +22,9 @@ class MapEventGetAddressFromCoordinate extends MapEvent {
   final LatLng coordinate;
   MapEventGetAddressFromCoordinate({required this.coordinate});
 }
+
+class MapEventOnUserLongTapOnMap extends MapEvent {
+  final LatLng coordinate;
+
+  MapEventOnUserLongTapOnMap(this.coordinate);
+}

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vietmap_map/extension/num_extension.dart';
 
+import '../../../constants/colors.dart';
 import '../bloc/routing_bloc.dart';
 import '../bloc/routing_state.dart';
 
@@ -75,19 +76,19 @@ class RoutingBottomPanel extends StatelessWidget {
                                         RoundedRectangleBorder(
                                             borderRadius:
                                                 BorderRadius.circular(18.0),
-                                            side: const BorderSide(
-                                                color: Colors.blue)))),
+                                            side: BorderSide(
+                                                color: vietmapColor)))),
                                 child: panelPosition == 0.0
                                     ? Row(
-                                        children: const [
-                                          Icon(Icons.menu, color: Colors.blue),
+                                        children: [
+                                          Icon(Icons.menu, color: vietmapColor),
                                           SizedBox(width: 10),
                                           Text('Các chặng'),
                                         ],
                                       )
                                     : Row(
-                                        children: const [
-                                          Icon(Icons.map, color: Colors.blue),
+                                        children: [
+                                          Icon(Icons.map, color: vietmapColor),
                                           SizedBox(width: 10),
                                           Text('Bản đồ'),
                                         ],
@@ -101,8 +102,8 @@ class RoutingBottomPanel extends StatelessWidget {
                                         RoundedRectangleBorder(
                                             borderRadius:
                                                 BorderRadius.circular(18.0),
-                                            side: const BorderSide(
-                                                color: Colors.blue)))),
+                                            side: BorderSide(
+                                                color: vietmapColor)))),
                                 child: SizedBox(
                                   height: 40,
                                   child: Row(

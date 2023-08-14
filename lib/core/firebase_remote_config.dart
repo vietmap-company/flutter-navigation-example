@@ -1,6 +1,4 @@
-import 'dart:convert';
-
-import 'package:firebase_remote_config/firebase_remote_config.dart'; 
+import 'package:firebase_remote_config/firebase_remote_config.dart';
 
 import '../data/models/vietmap_remote_config_model.dart';
 import '../di/app_context.dart';

@@ -1,6 +1,29 @@
-import '/domain/entities/vietmap_place.dart';
+import '../../domain/entities/vietmap_model.dart';
 
-class VietmapPlaceModel extends VietmapPlace {
+class VietmapPlaceModel extends VietmapModel {
+  String? hsNum;
+  String? street;
+  int? cityId;
+  String? city;
+  int? districtId;
+  String? district;
+  int? wardId;
+  String? ward;
+  VietmapPlaceModel({
+    super.display,
+    super.name,
+    super.lat,
+    super.lng,
+    super.address,
+    this.hsNum,
+    this.street,
+    this.cityId,
+    this.city,
+    this.districtId,
+    this.district,
+    this.wardId,
+    this.ward,
+  });
   VietmapPlaceModel.fromJson(Map<String, dynamic> json) {
     display = json['display'];
     name = json['name'];

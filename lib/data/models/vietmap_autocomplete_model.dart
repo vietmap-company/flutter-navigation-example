@@ -1,6 +1,15 @@
-import '/domain/entities/vietmap_autocomplete.dart';
+import 'package:vietmap_map/domain/entities/vietmap_model.dart';
 
-class VietmapAutocompleteModel extends VietmapAutocomplete {
+class VietmapAutocompleteModel extends VietmapModel {
+  String? refId;
+
+  VietmapAutocompleteModel({
+    this.refId,
+    super.address,
+    super.name,
+    super.display,
+  });
+
   VietmapAutocompleteModel.fromJson(Map<String, dynamic> json) {
     refId = json['ref_id'];
     address = json['address'];

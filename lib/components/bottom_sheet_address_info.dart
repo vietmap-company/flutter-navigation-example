@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../constants/colors.dart';
 import '../data/models/vietmap_reverse_model.dart';
 
 class AddressInfo extends StatelessWidget {
@@ -35,7 +36,7 @@ class AddressInfo extends StatelessWidget {
                       shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                           RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(18.0),
-                              side: const BorderSide(color: Colors.blue)))),
+                              side: const BorderSide(color: vietmapColor)))),
                   onPressed: () {
                     buildRoute();
                   },
@@ -48,11 +49,11 @@ class AddressInfo extends StatelessWidget {
               TextButton(
                   style: ButtonStyle(
                       foregroundColor:
-                          MaterialStateProperty.all<Color>(Colors.blue),
+                          MaterialStateProperty.all<Color>(vietmapColor),
                       shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                           RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(18.0),
-                              side: const BorderSide(color: Colors.blue)))),
+                              side: const BorderSide(color: vietmapColor)))),
                   onPressed: () {
                     buildAndStartRoute();
                   },

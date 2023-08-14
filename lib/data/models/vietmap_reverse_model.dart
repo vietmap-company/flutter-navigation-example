@@ -1,6 +1,17 @@
-import '/domain/entities/vietmap_reverse.dart';
+import 'package:vietmap_map/domain/entities/vietmap_model.dart';
 
-class VietmapReverseModel extends VietmapReverse {
+class VietmapReverseModel extends VietmapModel {
+  String? refId;
+  double? distance;
+
+  VietmapReverseModel(
+      {super.lat,
+      super.lng,
+      this.refId,
+      this.distance,
+      super.address,
+      super.name,
+      super.display});
   VietmapReverseModel.fromJson(Map<String, dynamic> json) {
     lat = json['lat'];
     lng = json['lng'];

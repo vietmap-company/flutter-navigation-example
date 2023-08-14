@@ -1,17 +1,16 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'package:vietmap_flutter_gl/vietmap_flutter_gl.dart';
+import 'package:vietmap_map/domain/entities/vietmap_model.dart';
 import 'package:vietmap_map/extension/latlng_extension.dart';
 import 'package:vietmap_map/features/routing_screen/bloc/routing_bloc.dart';
 import 'package:vietmap_map/features/routing_screen/components/routing_bottom_panel.dart';
 import 'package:vietmap_map/features/routing_screen/components/routing_header.dart';
 
+import '../../constants/colors.dart';
 import '../../constants/route.dart';
-import '../../data/models/vietmap_place_model.dart';
 import '../../di/app_context.dart';
 import '../map_screen/bloc/map_bloc.dart';
 import '../map_screen/bloc/map_state.dart';
@@ -30,7 +29,7 @@ class _RoutingScreenState extends State<RoutingScreen> {
   VietmapController? _controller;
   bool isFromOrigin = true;
   final PanelController _panelController = PanelController();
-  List<Marker> _listMarker = [];
+  final List<Marker> _listMarker = [];
   double panelPosition = 0.0;
   @override
   void initState() {
@@ -39,12 +38,9 @@ class _RoutingScreenState extends State<RoutingScreen> {
       Future.delayed(const Duration(milliseconds: 200))
           .then((value) => _panelController.hide());
       if (ModalRoute.of(context)!.settings.arguments != null) {
-        var args =
-            ModalRoute.of(context)!.settings.arguments as VietmapPlaceModel;
+        var args = ModalRoute.of(context)!.settings.arguments as VietmapModel;
         var res = await Geolocator.getCurrentPosition();
         if (!mounted) return;
-        // context.read<MapBloc>().add(MapEventGetDirection(
-        //     from: res.toLatLng(), to: LatLng(args.lat ?? 0, args.lng ?? 0)));
         context.read<RoutingBloc>().add(RoutingEventUpdateRouteParams(
             originDescription: 'Vị trí của bạn',
             originPoint: res.toLatLng(),
@@ -68,7 +64,7 @@ class _RoutingScreenState extends State<RoutingScreen> {
           _controller?.addPolyline(PolylineOptions(
             geometry: state.listPoint,
             polylineWidth: 4,
-            polylineColor: Colors.blue,
+            polylineColor: vietmapColor,
           ));
 
           _controller?.animateCamera(CameraUpdate.newLatLngBounds(
@@ -87,18 +83,22 @@ class _RoutingScreenState extends State<RoutingScreen> {
           setState(() {
             _listMarker.clear();
             _listMarker.add(Marker(
-                width: 40,
-                height: 40,
-                alignment: Alignment.bottomCenter,
-                child: const Icon(Icons.location_on_sharp,
-                    size: 40, color: Colors.red),
+                width: 17,
+                height: 17,
+                child: DecoratedBox(
+                    decoration:
+                        BoxDecoration(shape: BoxShape.circle, boxShadow: [
+                      BoxShadow(color: Colors.grey.shade300, blurRadius: 0.5)
+                    ]),
+                    child: const Icon(Icons.circle,
+                        size: 15, color: Colors.black)),
                 latLng: state.listPoint.first));
             _listMarker.add(Marker(
                 width: 40,
                 height: 40,
                 alignment: Alignment.bottomCenter,
-                child: const Icon(Icons.location_on_sharp,
-                    size: 40, color: Colors.blue),
+                child: const Icon(Icons.location_pin,
+                    size: 42, color: vietmapColor),
                 latLng: state.listPoint.last));
           });
         }
@@ -108,11 +108,17 @@ class _RoutingScreenState extends State<RoutingScreen> {
           if (state is MapStateGetPlaceDetailSuccess) {
             if (isFromOrigin) {
               _listMarker.add(Marker(
-                  width: 40,
-                  height: 40,
+                  width: 17,
+                  height: 17,
                   alignment: Alignment.bottomCenter,
-                  child: const Icon(Icons.location_on_sharp,
-                      size: 40, color: Colors.red),
+                  child: DecoratedBox(
+                    decoration:
+                        BoxDecoration(shape: BoxShape.circle, boxShadow: [
+                      BoxShadow(color: Colors.grey.shade300, blurRadius: 0.5)
+                    ]),
+                    child:
+                        const Icon(Icons.circle, size: 15, color: Colors.black),
+                  ),
                   latLng: LatLng(
                       state.response.lat ?? 0, state.response.lng ?? 0)));
               context.read<RoutingBloc>().add(RoutingEventUpdateRouteParams(
@@ -124,8 +130,8 @@ class _RoutingScreenState extends State<RoutingScreen> {
                   width: 40,
                   height: 40,
                   alignment: Alignment.bottomCenter,
-                  child: const Icon(Icons.location_on_sharp,
-                      size: 40, color: Colors.blue),
+                  child: const Icon(Icons.location_pin,
+                      size: 40, color: vietmapColor),
                   latLng: LatLng(
                       state.response.lat ?? 0, state.response.lng ?? 0)));
               context.read<RoutingBloc>().add(RoutingEventUpdateRouteParams(

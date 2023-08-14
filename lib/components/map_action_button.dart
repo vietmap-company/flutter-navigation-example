@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../constants/colors.dart';
+
 class MapActionButton extends StatelessWidget {
   final VoidCallback onPressed;
   final Widget child;
@@ -34,7 +36,7 @@ class MapActionButtonOutline extends StatelessWidget {
             shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                 RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(18.0),
-                    side: const BorderSide(color: Colors.blue)))),
+                    side: const BorderSide(color: vietmapColor)))),
         child: child);
   }
 }

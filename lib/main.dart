@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:vietmap_map/constants/colors.dart';
 import 'package:vietmap_map/features/navigation_screen/navigation_screen.dart';
 import 'package:vietmap_map/features/pick_address_screen/pick_address_screen.dart';
 import 'package:vietmap_map/features/routing_screen/bloc/routing_bloc.dart';
@@ -34,8 +35,7 @@ Future<void> main() async {
     await FirebaseRemoteConfigure.initConfig();
     await FirebaseRemoteConfigure.getAllRemoteConfigValues();
   } catch (e) {
-    FirebaseAnalytics.instance
-        .logEvent(name: 'error_init_firebase_remote_config');
+    analytics.logEvent(name: 'error_init_firebase_remote_config');
     try {
       await FirebaseRemoteConfigure.getAllRemoteConfigValues();
     } catch (e) {
@@ -55,14 +55,28 @@ Future<void> main() async {
         Routes.routingScreen: (context) => const RoutingScreen(),
         Routes.navigationScreen: (context) => const NavigationScreen(),
         Routes.pickAddressScreen: (context) => const PickAddressScreen(),
-        Routes.searchAddressForRoutingScreen: (context) =>
-            const SearchAddress(),
+        Routes.searchAddressForRoutingScreen: (context) => const SearchAddress()
       },
       initialRoute: Routes.mapScreen,
       theme: ThemeData(
-        primarySwatch: Colors.blue,
-        fontFamily: GoogleFonts.montserrat().fontFamily,
-      ),
+          primarySwatch: MaterialColor(
+            0xFF2a5dff,
+            <int, Color>{
+              50: vietmapColor.withOpacity(0.05),
+              100: vietmapColor.withOpacity(0.1),
+              200: vietmapColor.withOpacity(0.2),
+              300: vietmapColor.withOpacity(0.3),
+              400: vietmapColor.withOpacity(0.4),
+              500: vietmapColor,
+              600: vietmapColor.withOpacity(0.6),
+              700: vietmapColor.withOpacity(0.7),
+              800: vietmapColor.withOpacity(0.8),
+              900: vietmapColor.withOpacity(0.9),
+            },
+          ),
+          primaryColor: vietmapColor,
+          primaryColorLight: vietmapColor,
+          fontFamily: GoogleFonts.montserrat().fontFamily),
       debugShowCheckedModeBanner: false,
       builder: EasyLoading.init(),
     ),

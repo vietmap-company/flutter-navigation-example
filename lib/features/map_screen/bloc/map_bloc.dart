@@ -6,7 +6,6 @@ import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:vietmap_flutter_gl/vietmap_flutter_gl.dart';
 import 'package:vietmap_map/domain/repository/vietmap_api_repositories.dart';
 import 'package:vietmap_map/domain/usecase/search_address_usecase.dart';
-
 import '../../../di/app_context.dart';
 import '../../../domain/entities/vietmap_routing_params.dart';
 import '../../../domain/usecase/get_direction_usecase.dart';
@@ -21,7 +20,13 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     on<MapEventGetDetailAddress>(_onMapEventGetDetailAddress);
     on<MapEventGetDirection>(_onMapEventGetDirection);
     on<MapEventGetAddressFromCoordinate>(_onMapEventGetAddressFromCoordinate);
+    on<MapEventOnUserLongTapOnMap>(_onMapEventOnUserLongTapOnMap);
   }
+  _onMapEventOnUserLongTapOnMap(
+      MapEventOnUserLongTapOnMap event, Emitter<MapState> emit) async {
+    add(MapEventGetAddressFromCoordinate(coordinate: event.coordinate));
+  }
+
   _onMapEventGetAddressFromCoordinate(
       MapEventGetAddressFromCoordinate event, Emitter<MapState> emit) async {
     emit(MapStateLoading());
