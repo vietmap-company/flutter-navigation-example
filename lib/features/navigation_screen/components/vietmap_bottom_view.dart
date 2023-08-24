@@ -3,9 +3,6 @@ import 'package:intl/intl.dart';
 import 'package:vietmap_flutter_navigation/embedded/controller.dart';
 import 'package:vietmap_flutter_navigation/models/route_progress_event.dart';
 
-// import '../embedded/controller.dart';
-// import '../models/route_progress_event.dart';
-
 class VietmapBottomActionView extends StatelessWidget {
   const VietmapBottomActionView(
       {super.key,

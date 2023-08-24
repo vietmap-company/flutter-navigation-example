@@ -1,3 +1,5 @@
+// ignore_for_file: overridden_fields
+
 import 'package:equatable/equatable.dart';
 import 'package:vietmap_flutter_gl/vietmap_flutter_gl.dart';
 import 'package:vietmap_map/domain/entities/vietmap_routing_params.dart';
@@ -38,7 +40,10 @@ class RoutingStateLoading extends RoutingState {
 
 class RoutingStateGetDirectionSuccess extends RoutingState {
   final VietMapRoutingModel response;
+
+  @override
   final List<LatLng> listPoint;
+  @override
   final VietMapRoutingParams? routingParams;
   const RoutingStateGetDirectionSuccess(
       {required this.response, required this.listPoint, this.routingParams})

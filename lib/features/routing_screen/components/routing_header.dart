@@ -199,8 +199,10 @@ class RoutingHeader extends StatelessWidget {
           decoration: BoxDecoration(
               border: Border.all(color: Colors.white),
               borderRadius: BorderRadius.circular(10),
-              boxShadow: [BoxShadow(color: vietmapColor, blurRadius: 10)]),
-          child: Icon(
+              boxShadow: const [
+                BoxShadow(color: vietmapColor, blurRadius: 10)
+              ]),
+          child: const Icon(
             Icons.circle,
             size: 10,
             color: vietmapColor,

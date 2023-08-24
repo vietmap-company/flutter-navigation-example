@@ -31,9 +31,9 @@ class _PickAddressScreenState extends State<PickAddressScreen> {
             Navigator.pop(context);
           },
           child: const Icon(Icons.arrow_back_ios_rounded, color: Colors.black)),
-      title: Column(
+      title: const Column(
         mainAxisSize: MainAxisSize.min,
-        children: const [
+        children: [
           Text(
             'Chọn địa chỉ',
             style: TextStyle(color: Colors.black),
@@ -127,9 +127,9 @@ class _PickAddressScreenState extends State<PickAddressScreen> {
                                   Navigator.pop(context, pickerData);
                                 }
                               },
-                              child: Row(
+                              child: const Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
-                                children: const [
+                                children: [
                                   Text('Chọn'),
                                 ],
                               )),

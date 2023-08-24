@@ -76,17 +76,17 @@ class RoutingBottomPanel extends StatelessWidget {
                                         RoundedRectangleBorder(
                                             borderRadius:
                                                 BorderRadius.circular(18.0),
-                                            side: BorderSide(
+                                            side: const BorderSide(
                                                 color: vietmapColor)))),
                                 child: panelPosition == 0.0
-                                    ? Row(
+                                    ? const Row(
                                         children: [
                                           Icon(Icons.menu, color: vietmapColor),
                                           SizedBox(width: 10),
                                           Text('Các chặng'),
                                         ],
                                       )
-                                    : Row(
+                                    : const Row(
                                         children: [
                                           Icon(Icons.map, color: vietmapColor),
                                           SizedBox(width: 10),
@@ -102,12 +102,12 @@ class RoutingBottomPanel extends StatelessWidget {
                                         RoundedRectangleBorder(
                                             borderRadius:
                                                 BorderRadius.circular(18.0),
-                                            side: BorderSide(
+                                            side: const BorderSide(
                                                 color: vietmapColor)))),
-                                child: SizedBox(
+                                child: const SizedBox(
                                   height: 40,
                                   child: Row(
-                                    children: const [
+                                    children: [
                                       Icon(Icons.turn_right_outlined,
                                           color: Colors.white),
                                       SizedBox(width: 10),

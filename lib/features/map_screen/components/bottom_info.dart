@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:vietmap_flutter_gl/vietmap_flutter_gl.dart';
 import 'package:vietmap_map/components/map_action_button.dart';
-import 'package:vietmap_map/domain/entities/vietmap_model.dart';
 import 'package:vietmap_map/extension/latlng_extension.dart';
 import 'package:vietmap_map/features/map_screen/bloc/map_bloc.dart';
 import 'package:vietmap_map/features/navigation_screen/models/navigation_params.dart';
@@ -83,8 +82,8 @@ class BottomSheetInfo extends StatelessWidget {
                               //         state.response.lng ?? 0))
                               );
                         },
-                        child: Row(
-                          children: const [
+                        child: const Row(
+                          children: [
                             Icon(Icons.directions, color: Colors.white),
                             SizedBox(width: 5),
                             Text('Chỉ đường')
@@ -103,8 +102,8 @@ class BottomSheetInfo extends StatelessWidget {
                                     state.response.lng ?? 0),
                               ));
                         },
-                        child: Row(
-                          children: const [
+                        child: const Row(
+                          children: [
                             Icon(Icons.arrow_circle_up_rounded,
                                 color: vietmapColor),
                             SizedBox(width: 5),
@@ -181,8 +180,8 @@ class BottomSheetInfo extends StatelessWidget {
                               //         state.response.lng ?? 0))
                                       );
                         },
-                        child: Row(
-                          children: const [
+                        child: const Row(
+                          children: [
                             Icon(Icons.directions, color: Colors.white),
                             SizedBox(width: 5),
                             Text('Chỉ đường')
@@ -201,8 +200,8 @@ class BottomSheetInfo extends StatelessWidget {
                                     state.response.lng ?? 0),
                               ));
                         },
-                        child: Row(
-                          children: const [
+                        child: const Row(
+                          children: [
                             Icon(Icons.arrow_circle_up_rounded,
                                 color: vietmapColor),
                             SizedBox(width: 5),

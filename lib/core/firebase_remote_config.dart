@@ -1,4 +1,5 @@
 import 'package:firebase_remote_config/firebase_remote_config.dart';
+import 'package:flutter/material.dart';
 
 import '../data/models/vietmap_remote_config_model.dart';
 import '../di/app_context.dart';
@@ -19,7 +20,7 @@ class FirebaseRemoteConfigure {
     data.forEach((key, value) {
       result.addAll({key: value.asString()});
     });
-    print(result);
+    debugPrint(result.toString());
 
     AppContext.setRemoteConfigValue(RemoteConfigModel.fromMap(result));
     return result;

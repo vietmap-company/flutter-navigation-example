@@ -27,6 +27,7 @@ class _MapScreenState extends State<MapScreen> {
   double panelPosition = 0.0;
   bool isShowMarker = true;
   final PanelController _panelController = PanelController();
+  Position? position;
   @override
   void initState() {
     super.initState();
@@ -39,6 +40,12 @@ class _MapScreenState extends State<MapScreen> {
           res != LocationPermission.whileInUse) {
         await Geolocator.requestPermission();
       }
+      Geolocator.getPositionStream().listen((event) {
+        setState(() {
+          position = event;
+          debugPrint(position!.heading.toString());
+        });
+      });
     });
   }
 
@@ -118,14 +125,14 @@ class _MapScreenState extends State<MapScreen> {
               children: [
                 VietmapGL(
                   myLocationEnabled: true,
-                  myLocationTrackingMode:
-                      MyLocationTrackingMode.TrackingCompass,
-                  myLocationRenderMode: MyLocationRenderMode.NORMAL,
+                  myLocationTrackingMode: MyLocationTrackingMode.TrackingGPS,
+                  myLocationRenderMode: MyLocationRenderMode.GPS,
                   trackCameraPosition: true,
                   compassViewMargins: const Point(10, 90),
                   styleString: AppContext.getVietmapMapStyleUrl() ?? "",
                   initialCameraPosition: const CameraPosition(
                       target: LatLng(10.762201, 106.654213), zoom: 10),
+                  onUserLocationUpdated: (location) {},
                   onMapCreated: (controller) {
                     setState(() {
                       _controller = controller;
@@ -143,6 +150,28 @@ class _MapScreenState extends State<MapScreen> {
                         mapController: _controller!,
                         markers: _markers,
                       ),
+                _controller == null
+                    ? const SizedBox.shrink()
+                    : MarkerLayer(
+                        mapController: _controller!,
+                        markers: _markers,
+                      ),
+                // _controller == null || position == null
+                //     ? const SizedBox.shrink()
+                //     : MarkerLayer(
+                //         ignorePointer: true,
+                //         mapController: _controller!,
+                //         markers: [
+                //             Marker(
+                //                 child: Container(
+                //                     decoration: const BoxDecoration(
+                //                         shape: BoxShape.circle,
+                //                         color: Colors.white),
+                //                     child: const Icon(
+                //                         Icons.arrow_circle_up_rounded)),
+                //                 // latLng: _mapController!.cameraPosition!.target
+                //                 latLng: position!.toLatLng())
+                //           ]),
                 Positioned(
                   key: const Key('searchBarKey'),
                   top: MediaQuery.of(context).viewPadding.top,

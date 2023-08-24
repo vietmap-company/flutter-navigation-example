@@ -81,4 +81,5 @@ Future<void> main() async {
       builder: EasyLoading.init(),
     ),
   ));
+  
 }
