@@ -97,8 +97,8 @@ class _RoutingScreenState extends State<RoutingScreen> {
                 width: 40,
                 height: 40,
                 alignment: Alignment.bottomCenter,
-                child: const Icon(Icons.location_pin,
-                    size: 42, color: vietmapColor),
+                child:
+                    const Icon(Icons.location_pin, size: 42, color: Colors.red),
                 latLng: state.listPoint.last));
           });
         }
