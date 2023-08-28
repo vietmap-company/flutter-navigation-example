@@ -139,22 +139,27 @@ class _RoutingScreenV2State extends State<RoutingScreenV2> {
                     NavigationView(
                       mapOptions: _navigationOption,
                       onMapRendered: () async {
-                        var args = ModalRoute.of(context)!.settings.arguments
-                            as VietmapModel;
-                        var listWaypoint = <WayPoint>[];
-                        var res = await Geolocator.getCurrentPosition();
-                        listWaypoint.add(WayPoint(
-                            name: '',
-                            latitude: res.toLatLng().latitude,
-                            longitude: res.toLatLng().longitude));
+                        if (ModalRoute.of(context)!.settings.arguments !=
+                            null) {
+                          var args = ModalRoute.of(context)!.settings.arguments
+                              as VietmapModel;
+                          var listWaypoint = <WayPoint>[];
+                          var res = await Geolocator.getCurrentPosition();
+                          listWaypoint.add(WayPoint(
+                              name: '',
+                              latitude: res.toLatLng().latitude,
+                              longitude: res.toLatLng().longitude));
 
-                        listWaypoint.add(WayPoint(
-                            name: '', latitude: args.lat, longitude: args.lng));
-                        _navigationController
-                            ?.buildRoute(
-                                wayPoints: listWaypoint,
-                                profile: DrivingProfile.drivingTraffic)
-                            .then((value) {});
+                          listWaypoint.add(WayPoint(
+                              name: '',
+                              latitude: args.lat,
+                              longitude: args.lng));
+                          _navigationController
+                              ?.buildRoute(
+                                  wayPoints: listWaypoint,
+                                  profile: DrivingProfile.drivingTraffic)
+                              .then((value) {});
+                        }
                       },
                       onMapCreated: (p0) async {
                         _navigationController = p0;
