@@ -21,4 +21,18 @@ extension NumExtension on num? {
       return '${(seconds / 86400).toStringAsFixed(0)} ngày, ${(seconds % 86400 / 3600).toStringAsFixed(0)} giờ, ${(seconds % 3600 / 60).toStringAsFixed(0)} phút';
     }
   }
+
+  String convertNativeResponseSecondsToString() {
+    if (this == null) return '';
+    var seconds = this! ;
+    if (seconds < 60) {
+      return '${(seconds).toStringAsFixed(0)} giây';
+    } else if (seconds < 3600) {
+      return '${(seconds / 60).toStringAsFixed(0)} phút';
+    } else if (seconds < 86400) {
+      return '${(seconds / 3600).toStringAsFixed(0)} giờ, ${(seconds % 3600 / 60).toStringAsFixed(0)} phút';
+    } else {
+      return '${(seconds / 86400).toStringAsFixed(0)} ngày, ${(seconds % 86400 / 3600).toStringAsFixed(0)} giờ, ${(seconds % 3600 / 60).toStringAsFixed(0)} phút';
+    }
+  }
 }

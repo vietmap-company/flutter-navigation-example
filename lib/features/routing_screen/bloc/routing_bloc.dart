@@ -2,6 +2,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:vietmap_flutter_gl/vietmap_flutter_gl.dart';
+import 'package:vietmap_flutter_navigation/models/way_point.dart';
+import 'package:vietmap_map/extension/driving_profile_extension.dart';
 import 'package:vietmap_map/features/routing_screen/bloc/routing_event.dart';
 import 'package:vietmap_map/features/routing_screen/bloc/routing_state.dart';
 
@@ -17,7 +19,13 @@ class RoutingBloc extends Bloc<RoutingEvent, RoutingState> {
     on<RoutingEventUpdateRouteParams>(_onRoutingEventUpdateRouteParams);
     on<RoutingEventClearDirection>(_onRoutingEventClearDirection);
     on<RoutingEventReverseDirection>(_onRoutingEventReverseDirection);
+    on<RoutingEventNativeRouteBuilt>(_onRoutingEventNativeRouteBuilt);
   }
+  _onRoutingEventNativeRouteBuilt(
+      RoutingEventNativeRouteBuilt event, Emitter<RoutingState> emit) {
+    emit(RoutingStateNativeRouteBuilt(state, event.directionRoute));
+  }
+
   _onRoutingEventReverseDirection(
       RoutingEventReverseDirection event, Emitter<RoutingState> emit) {
     var params = state.routingParams;
@@ -38,12 +46,25 @@ class RoutingBloc extends Bloc<RoutingEvent, RoutingState> {
       if (params.originPoint != null && params.destinationPoint != null) {
         add(RoutingEventGetDirection(
             from: params.originPoint!, to: params.destinationPoint!));
+        if (params.navigationController != null) {
+          params.navigationController!.buildRoute(wayPoints: [
+            WayPoint(
+                name: '',
+                latitude: params.originPoint!.latitude,
+                longitude: params.originPoint!.longitude),
+            WayPoint(
+                name: '',
+                latitude: params.destinationPoint!.latitude,
+                longitude: params.destinationPoint!.longitude)
+          ], profile: params.vehicle.convertToDrivingProfile());
+        }
       }
     }
   }
 
   _onRoutingEventClearDirection(
       RoutingEventClearDirection event, Emitter<RoutingState> emit) {
+    state.routingParams?.navigationController?.clearRoute();
     emit(RoutingStateInitial());
   }
 
@@ -63,6 +84,8 @@ class RoutingBloc extends Bloc<RoutingEvent, RoutingState> {
         event.originDescription ?? params.originDescription;
     params.destinationDescription =
         event.destinationDescription ?? params.destinationDescription;
+    params.navigationController =
+        event.navigationController ?? params.navigationController;
     if (params.originPoint != null && params.destinationPoint != null) {
       emit(RoutingState(
           listPoint: <LatLng>[...(state.listPoint ?? [])],
@@ -70,6 +93,18 @@ class RoutingBloc extends Bloc<RoutingEvent, RoutingState> {
           routingParams: params));
       add(RoutingEventGetDirection(
           from: params.originPoint!, to: params.destinationPoint!));
+      if (params.navigationController != null) {
+        params.navigationController!.buildRoute(wayPoints: [
+          WayPoint(
+              name: '',
+              latitude: params.originPoint!.latitude,
+              longitude: params.originPoint!.longitude),
+          WayPoint(
+              name: '',
+              latitude: params.destinationPoint!.latitude,
+              longitude: params.destinationPoint!.longitude)
+        ], profile: params.vehicle.convertToDrivingProfile());
+      }
     }
   }
 
@@ -99,7 +134,7 @@ class RoutingBloc extends Bloc<RoutingEvent, RoutingState> {
             PolylinePoints().decodePolyline(r.paths!.first.points!).map((e) {
           return LatLng(e.latitude, e.longitude);
         }).toList();
-        emit(RoutingStateGetDirectionSuccess(
+        emit(RoutingStateGetDirectionSuccess(state,
             response: r, listPoint: locs, routingParams: routingParams));
       }
     });

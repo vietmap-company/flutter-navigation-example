@@ -1,5 +1,4 @@
-import 'dart:developer';
-
+ 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
@@ -33,8 +32,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     EasyLoading.show();
     var response = await GetLocationFromLatLngUseCase(VietmapApiRepositories())
         .call(LocationPoint(
-            lat: event.coordinate.latitude, long: event.coordinate.longitude));
-    log(response.toString());
+            lat: event.coordinate.latitude, long: event.coordinate.longitude)); 
     EasyLoading.dismiss();
     response.fold((l) => emit(MapStateGetLocationFromCoordinateError('Error')),
         (r) => emit(MapStateGetLocationFromCoordinateSuccess(r)));

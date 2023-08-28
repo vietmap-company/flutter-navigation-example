@@ -5,5 +5,8 @@ class Routes {
   static const String routingScreen = '/routingScreen';
   static const String navigationScreen = '/navigationScreen';
   static const String pickAddressScreen = '/pickAddressScreen';
-  static const String searchAddressForRoutingScreen = '/searchAddressForRouting';
+  static const String searchAddressForRoutingScreen =
+      '/searchAddressForRouting';
+
+  static const String routingV2Screen = '/routingV2Screen';
 }

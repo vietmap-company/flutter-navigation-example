@@ -59,7 +59,7 @@ class AddressInfo extends StatelessWidget {
                   },
                   child: const Row(
                     children: [
-                      Icon(Icons.arrow_upward_rounded, size: 17),
+                      Icon(Icons.navigation_sharp, size: 17),
                       Text('Bắt đầu'),
                     ],
                   )),

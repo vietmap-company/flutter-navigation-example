@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:vietmap_flutter_gl/vietmap_flutter_gl.dart';
 import 'package:vietmap_map/components/map_action_button.dart';
@@ -8,7 +9,7 @@ import 'package:vietmap_map/features/map_screen/bloc/map_bloc.dart';
 import 'package:vietmap_map/features/navigation_screen/models/navigation_params.dart';
 
 import '../../../constants/colors.dart';
-import '../../../constants/route.dart'; 
+import '../../../constants/route.dart';
 import '../bloc/map_state.dart';
 
 class BottomSheetInfo extends StatelessWidget {
@@ -18,7 +19,8 @@ class BottomSheetInfo extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<MapBloc, MapState>(
       buildWhen: (previous, current) =>
-          current is MapStateGetPlaceDetailSuccess,
+          current is MapStateGetPlaceDetailSuccess ||
+          current is MapStateGetLocationFromCoordinateSuccess,
       builder: (_, state) {
         if (state is MapStateGetPlaceDetailSuccess) {
           return Container(
@@ -74,13 +76,9 @@ class BottomSheetInfo extends StatelessWidget {
                   children: [
                     MapActionButton(
                         onPressed: () async {
-                          Navigator.pushNamed(context, Routes.routingScreen,
-                              arguments: state.response
-                              //  VietmapRoutingScreenParams(
-                              //     name: state.response.display ?? '',
-                              //     coordinate: LatLng(state.response.lat ?? 0,
-                              //         state.response.lng ?? 0))
-                              );
+                          EasyLoading.show();
+                          Navigator.pushNamed(context, Routes.routingV2Screen,
+                              arguments: state.response);
                         },
                         child: const Row(
                           children: [
@@ -104,8 +102,7 @@ class BottomSheetInfo extends StatelessWidget {
                         },
                         child: const Row(
                           children: [
-                            Icon(Icons.arrow_circle_up_rounded,
-                                color: vietmapColor),
+                            Icon(Icons.navigation_sharp, color: vietmapColor),
                             SizedBox(width: 5),
                             Text('Bắt đầu',
                                 style: TextStyle(color: vietmapColor)),
@@ -171,14 +168,9 @@ class BottomSheetInfo extends StatelessWidget {
                   children: [
                     MapActionButton(
                         onPressed: () async {
-                          Navigator.pushNamed(context, Routes.routingScreen,
-                              arguments:
-                              state.response
-                              //  VietmapRoutingScreenParams(
-                              //     name: state.response.display ?? '',
-                              //     coordinate: LatLng(state.response.lat ?? 0,
-                              //         state.response.lng ?? 0))
-                                      );
+                          EasyLoading.show();
+                          Navigator.pushNamed(context, Routes.routingV2Screen,
+                              arguments: state.response);
                         },
                         child: const Row(
                           children: [
@@ -202,8 +194,7 @@ class BottomSheetInfo extends StatelessWidget {
                         },
                         child: const Row(
                           children: [
-                            Icon(Icons.arrow_circle_up_rounded,
-                                color: vietmapColor),
+                            Icon(Icons.navigation_sharp, color: vietmapColor),
                             SizedBox(width: 5),
                             Text('Bắt đầu',
                                 style: TextStyle(color: vietmapColor)),
