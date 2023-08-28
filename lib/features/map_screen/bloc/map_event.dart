@@ -1,4 +1,5 @@
 import 'package:vietmap_flutter_gl/vietmap_flutter_gl.dart';
+import 'package:vietmap_map/data/models/vietmap_autocomplete_model.dart';
 
 class MapEvent {}
 
@@ -8,8 +9,9 @@ class MapEventSearchAddress extends MapEvent {
 }
 
 class MapEventGetDetailAddress extends MapEvent {
-  final String placeId;
-  MapEventGetDetailAddress({required this.placeId});
+  final VietmapAutocompleteModel model;
+
+  MapEventGetDetailAddress(this.model);
 }
 
 class MapEventGetDirection extends MapEvent {
@@ -28,3 +30,5 @@ class MapEventOnUserLongTapOnMap extends MapEvent {
 
   MapEventOnUserLongTapOnMap(this.coordinate);
 }
+
+class MapEventGetHistorySearch extends MapEvent {}

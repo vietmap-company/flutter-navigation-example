@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:vietmap_map/constants/colors.dart';
 import 'package:vietmap_map/features/navigation_screen/navigation_screen.dart';
 import 'package:vietmap_map/features/pick_address_screen/pick_address_screen.dart';
@@ -25,6 +26,7 @@ Future<void> main() async {
 
   await Firebase.initializeApp();
   FirebaseAnalytics analytics = FirebaseAnalytics.instance;
+  await Hive.initFlutter();
   FlutterError.onError = (errorDetails) {
     FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
   };

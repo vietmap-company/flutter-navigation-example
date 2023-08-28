@@ -1,13 +1,16 @@
- 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:vietmap_flutter_gl/vietmap_flutter_gl.dart';
+import 'package:vietmap_map/domain/repository/history_search_repositories.dart';
 import 'package:vietmap_map/domain/repository/vietmap_api_repositories.dart';
 import 'package:vietmap_map/domain/usecase/search_address_usecase.dart';
+import '../../../core/no_params.dart';
 import '../../../di/app_context.dart';
 import '../../../domain/entities/vietmap_routing_params.dart';
+import '../../../domain/usecase/add_history_search_usecase.dart';
 import '../../../domain/usecase/get_direction_usecase.dart';
+import '../../../domain/usecase/get_history_search_usecase.dart';
 import '../../../domain/usecase/get_location_from_latlng_usecase.dart';
 import '../../../domain/usecase/get_place_detail_usecase.dart';
 import 'map_event.dart';
@@ -20,7 +23,20 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     on<MapEventGetDirection>(_onMapEventGetDirection);
     on<MapEventGetAddressFromCoordinate>(_onMapEventGetAddressFromCoordinate);
     on<MapEventOnUserLongTapOnMap>(_onMapEventOnUserLongTapOnMap);
+    on<MapEventGetHistorySearch>(_onMapEventGetHistorySearch);
   }
+  _onMapEventGetHistorySearch(
+      MapEventGetHistorySearch event, Emitter<MapState> emit) async {
+    emit(MapStateLoading());
+    EasyLoading.show();
+    var response = await GetHistorySearchUseCase(HistorySearchRepositories())
+        .call(NoParams());
+    EasyLoading.dismiss();
+    print(response);
+    response.fold((l) => emit(MapStateGetHistorySearchError('Error')),
+        (r) => emit(MapStateGetHistorySearchSuccess(r)));
+  }
+
   _onMapEventOnUserLongTapOnMap(
       MapEventOnUserLongTapOnMap event, Emitter<MapState> emit) async {
     add(MapEventGetAddressFromCoordinate(coordinate: event.coordinate));
@@ -32,7 +48,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     EasyLoading.show();
     var response = await GetLocationFromLatLngUseCase(VietmapApiRepositories())
         .call(LocationPoint(
-            lat: event.coordinate.latitude, long: event.coordinate.longitude)); 
+            lat: event.coordinate.latitude, long: event.coordinate.longitude));
     EasyLoading.dismiss();
     response.fold((l) => emit(MapStateGetLocationFromCoordinateError('Error')),
         (r) => emit(MapStateGetLocationFromCoordinateSuccess(r)));
@@ -61,8 +77,9 @@ class MapBloc extends Bloc<MapEvent, MapState> {
       MapEventGetDetailAddress event, Emitter<MapState> emit) async {
     emit(MapStateLoading());
     EasyLoading.show();
+    AddHistorySearchUseCase(HistorySearchRepositories()).call(event.model);
     var response = await GetPlaceDetailUseCase(VietmapApiRepositories())
-        .call(event.placeId);
+        .call(event.model.refId ?? '');
     EasyLoading.dismiss();
     response.fold((l) => emit(MapStateGetPlaceDetailError('Error')), (r) {
       emit(MapStateGetPlaceDetailSuccess(r));

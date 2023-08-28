@@ -5,6 +5,7 @@ import 'package:vietmap_map/components/debouncer_search.dart';
 import '../map_screen/bloc/map_bloc.dart';
 import '../map_screen/bloc/map_event.dart';
 import '../map_screen/bloc/map_state.dart';
+import 'components/recent_search.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
@@ -16,6 +17,7 @@ class SearchScreen extends StatefulWidget {
 class _SearchScreenState extends State<SearchScreen> {
   final FocusNode _focusNode = FocusNode();
   final Debounce _debounce = Debounce();
+  final TextEditingController _searchController = TextEditingController();
   @override
   void initState() {
     super.initState();
@@ -23,6 +25,7 @@ class _SearchScreenState extends State<SearchScreen> {
       await Future.delayed(const Duration(milliseconds: 500));
       _focusNode.requestFocus();
     });
+    context.read<MapBloc>().add(MapEventGetHistorySearch());
   }
 
   @override
@@ -48,6 +51,7 @@ class _SearchScreenState extends State<SearchScreen> {
                   ),
                   alignment: Alignment.center,
                   child: TextField(
+                    controller: _searchController,
                     onChanged: (value) {
                       if (value.isNotEmpty) {
                         _debounce.run(() {
@@ -86,11 +90,13 @@ class _SearchScreenState extends State<SearchScreen> {
                   ),
                 ),
               ),
+              RecentSearchWidget(
+                controller: _searchController,
+                focusNode: _focusNode,
+              ),
               BlocBuilder<MapBloc, MapState>(buildWhen: (previous, current) {
-                if (current is MapStateSearchAddressSuccess) {
-                  return true;
-                }
-                return false;
+                return current is MapStateSearchAddressSuccess ||
+                    current is MapStateGetHistorySearchSuccess;
               }, builder: (_, state) {
                 if (state is MapStateSearchAddressSuccess) {
                   return Expanded(
@@ -101,8 +107,7 @@ class _SearchScreenState extends State<SearchScreen> {
                             onTap: () {
                               context.read<MapBloc>().add(
                                   MapEventGetDetailAddress(
-                                      placeId:
-                                          state.response[index].refId ?? ''));
+                                      state.response[index]));
                               FocusScope.of(context).requestFocus(FocusNode());
                               Navigator.pop(context);
                             },

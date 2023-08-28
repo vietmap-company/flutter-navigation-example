@@ -156,22 +156,6 @@ class _MapScreenState extends State<MapScreen> {
                         mapController: _controller!,
                         markers: _markers,
                       ),
-                // _controller == null || position == null
-                //     ? const SizedBox.shrink()
-                //     : MarkerLayer(
-                //         ignorePointer: true,
-                //         mapController: _controller!,
-                //         markers: [
-                //             Marker(
-                //                 child: Container(
-                //                     decoration: const BoxDecoration(
-                //                         shape: BoxShape.circle,
-                //                         color: Colors.white),
-                //                     child: const Icon(
-                //                         Icons.arrow_circle_up_rounded)),
-                //                 // latLng: _mapController!.cameraPosition!.target
-                //                 latLng: position!.toLatLng())
-                //           ]),
                 Positioned(
                   key: const Key('searchBarKey'),
                   top: MediaQuery.of(context).viewPadding.top,
