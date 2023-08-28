@@ -1,15 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
-
 import 'package:flutter_svg/svg.dart';
-
 import 'package:vietmap_flutter_navigation/navigation_plugin.dart';
 import 'package:vietmap_flutter_navigation/embedded/controller.dart';
 import 'package:vietmap_flutter_navigation/models/options.dart';
 import 'package:vietmap_flutter_navigation/models/route_progress_event.dart';
 import 'package:vietmap_flutter_navigation/models/way_point.dart';
-import 'package:vietmap_flutter_navigation/views/banner_instruction.dart';
-import 'package:vietmap_flutter_navigation/views/bottom_action.dart';
 import 'package:vietmap_flutter_navigation/views/navigation_view.dart';
 import 'package:vietmap_map/constants/colors.dart';
 import 'package:vietmap_map/di/app_context.dart';
@@ -208,8 +204,8 @@ class _NavigationScreenState extends State<NavigationScreen> {
                 borderRadius: BorderRadius.circular(50),
                 color: Colors.white,
                 border: Border.all(color: Colors.black45, width: 1)),
-            child: Row(
-              children: const [
+            child: const Row(
+              children: [
                 Icon(
                   Icons.keyboard_double_arrow_up_sharp,
                   size: 35,

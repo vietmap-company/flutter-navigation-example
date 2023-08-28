@@ -97,8 +97,8 @@ class _RoutingScreenState extends State<RoutingScreen> {
                 width: 40,
                 height: 40,
                 alignment: Alignment.bottomCenter,
-                child: const Icon(Icons.location_pin,
-                    size: 42, color: vietmapColor),
+                child:
+                    const Icon(Icons.location_pin, size: 42, color: Colors.red),
                 latLng: state.listPoint.last));
           });
         }
@@ -179,6 +179,8 @@ class _RoutingScreenState extends State<RoutingScreen> {
                             markers: _listMarker, mapController: _controller!)
                         : const SizedBox.shrink(),
                     SlidingUpPanel(
+                        parallaxEnabled: true,
+                        parallaxOffset: .6,
                         controller: _panelController,
                         minHeight: MediaQuery.of(context).size.height * 0.2,
                         maxHeight: MediaQuery.of(context).size.height * 0.7,

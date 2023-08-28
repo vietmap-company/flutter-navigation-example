@@ -149,8 +149,8 @@ class _SearchAddressHeaderState extends State<SearchAddressHeader> {
                     Navigator.pop(context);
                   }
                 },
-                child: Row(
-                  children: const [
+                child: const Row(
+                  children: [
                     Icon(Icons.location_on_rounded, color: Colors.grey),
                     SizedBox(width: 10),
                     Text('Chọn trên bản đồ',
