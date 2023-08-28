@@ -58,3 +58,15 @@ class MapStateGetLocationFromCoordinateError extends MapState {
 
   MapStateGetLocationFromCoordinateError(this.message);
 }
+
+class MapStateGetHistorySearchSuccess extends MapState {
+  final List<VietmapAutocompleteModel> response;
+
+  MapStateGetHistorySearchSuccess(this.response);
+}
+
+class MapStateGetHistorySearchError extends MapState {
+  final String message;
+
+  MapStateGetHistorySearchError(this.message);
+}

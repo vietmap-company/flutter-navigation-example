@@ -1,6 +1,10 @@
+import 'package:hive/hive.dart';
 import 'package:vietmap_map/domain/entities/vietmap_model.dart';
+part 'vietmap_autocomplete_model.g.dart';
 
+@HiveType(typeId: 0)
 class VietmapAutocompleteModel extends VietmapModel {
+  @HiveField(0)
   String? refId;
 
   VietmapAutocompleteModel({
@@ -25,4 +29,23 @@ class VietmapAutocompleteModel extends VietmapModel {
     data['display'] = display;
     return data;
   }
+
+  @override
+  String toString() {
+    return 'VietmapAutocompleteModel{refId: $refId, address: $address, name: $name, display: $display}';
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is VietmapAutocompleteModel &&
+          runtimeType == other.runtimeType &&
+          refId == other.refId &&
+          address == other.address &&
+          name == other.name &&
+          display == other.display;
+
+  @override
+  int get hashCode =>
+      refId.hashCode ^ address.hashCode ^ name.hashCode ^ display.hashCode;
 }

@@ -53,8 +53,8 @@ class _SearchAddressState extends State<SearchAddress> {
                     itemBuilder: (_, index) {
                       return InkWell(
                         onTap: () {
-                          context.read<MapBloc>().add(MapEventGetDetailAddress(
-                              placeId: state.response[index].refId ?? ''));
+                          context.read<MapBloc>().add(
+                              MapEventGetDetailAddress(state.response[index]));
                           FocusScope.of(context).requestFocus(FocusNode());
                           Navigator.pop(context);
                         },
