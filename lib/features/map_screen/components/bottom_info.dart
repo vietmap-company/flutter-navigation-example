@@ -77,7 +77,7 @@ class BottomSheetInfo extends StatelessWidget {
                     MapActionButton(
                         onPressed: () async {
                           EasyLoading.show();
-                          Navigator.pushNamed(context, Routes.routingV2Screen,
+                          Navigator.pushNamed(context, Routes.routingScreen,
                               arguments: state.response);
                         },
                         child: const Row(
@@ -169,7 +169,7 @@ class BottomSheetInfo extends StatelessWidget {
                     MapActionButton(
                         onPressed: () async {
                           EasyLoading.show();
-                          Navigator.pushNamed(context, Routes.routingV2Screen,
+                          Navigator.pushNamed(context, Routes.routingScreen,
                               arguments: state.response);
                         },
                         child: const Row(

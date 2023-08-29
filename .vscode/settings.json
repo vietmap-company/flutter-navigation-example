@@ -4,6 +4,7 @@
         "Geolocator",
         "latlng",
         "Polyline",
+        "usecase",
         "Vietmap"
     ],
     "dart.flutterSdkPath": "/Users/dev/fvm/default/bin"
