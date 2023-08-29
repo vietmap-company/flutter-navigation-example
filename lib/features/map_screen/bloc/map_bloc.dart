@@ -32,7 +32,6 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     var response = await GetHistorySearchUseCase(HistorySearchRepositories())
         .call(NoParams());
     EasyLoading.dismiss();
-    print(response);
     response.fold((l) => emit(MapStateGetHistorySearchError('Error')),
         (r) => emit(MapStateGetHistorySearchSuccess(r)));
   }

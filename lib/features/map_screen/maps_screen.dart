@@ -217,7 +217,7 @@ class _MapScreenState extends State<MapScreen> {
                       const SizedBox(height: 10),
                       FloatingActionButton(
                         onPressed: () {
-                          Navigator.pushNamed(context, Routes.routingV2Screen);
+                          Navigator.pushNamed(context, Routes.routingScreen);
                         },
                         child: const Icon(Icons.directions),
                       ),

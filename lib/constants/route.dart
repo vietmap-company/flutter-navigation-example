@@ -7,6 +7,4 @@ class Routes {
   static const String pickAddressScreen = '/pickAddressScreen';
   static const String searchAddressForRoutingScreen =
       '/searchAddressForRouting';
-
-  static const String routingV2Screen = '/routingV2Screen';
 }

@@ -19,7 +19,6 @@ import 'constants/route.dart';
 import 'core/firebase_remote_config.dart';
 import 'features/map_screen/bloc/map_bloc.dart';
 import 'features/map_screen/maps_screen.dart';
-import 'features/routing_screen/routing_screen_v2.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -60,7 +59,6 @@ Future<void> main() async {
         Routes.pickAddressScreen: (context) => const PickAddressScreen(),
         Routes.searchAddressForRoutingScreen: (context) =>
             const SearchAddress(),
-        Routes.routingV2Screen: (context) => const RoutingScreenV2(),
       },
       initialRoute: Routes.mapScreen,
       theme: ThemeData(

@@ -11,10 +11,12 @@ class RoutingBottomPanel extends StatelessWidget {
       {super.key,
       required this.onStartNavigation,
       required this.onViewListStep,
-      required this.panelPosition});
+      required this.panelPosition,
+      required this.routingBloc});
   final VoidCallback onStartNavigation;
   final VoidCallback onViewListStep;
   final double panelPosition;
+  final RoutingBloc routingBloc;
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -41,10 +43,11 @@ class RoutingBottomPanel extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           BlocBuilder<RoutingBloc, RoutingState>(
+              bloc: routingBloc,
               buildWhen: (previous, current) =>
-                  current is RoutingStateGetDirectionSuccess,
+                  current is RoutingStateNativeRouteBuilt,
               builder: (context, state) {
-                if (state is RoutingStateGetDirectionSuccess) {
+                if (state is RoutingStateNativeRouteBuilt) {
                   return Padding(
                     padding: const EdgeInsets.only(left: 15.0),
                     child: Column(
@@ -53,14 +56,14 @@ class RoutingBottomPanel extends StatelessWidget {
                         RichText(
                             text: TextSpan(children: [
                           TextSpan(
-                              text: state.routingModel?.paths?.first.time
-                                      ?.convertSecondsToString() ??
+                              text: state.directionRoute?.duration
+                                      ?.convertNativeResponseSecondsToString() ??
                                   '',
                               style: const TextStyle(
                                   color: Colors.black, fontSize: 17)),
                           TextSpan(
                               text:
-                                  ' (${state.routingModel?.paths?.first.distance?.distanceToString() ?? ''})',
+                                  ' (${state.directionRoute?.distance?.distanceToString() ?? ''})',
                               style: const TextStyle(
                                   color: Colors.grey, fontSize: 17)),
                         ])),
@@ -83,7 +86,7 @@ class RoutingBottomPanel extends StatelessWidget {
                                         tag: 'listStep',
                                         child: Row(
                                           children: [
-                                            Icon(Icons.menu_rounded,
+                                            Icon(Icons.menu,
                                                 color: vietmapColor),
                                             SizedBox(width: 10),
                                             Text('Các chặng'),
@@ -94,7 +97,7 @@ class RoutingBottomPanel extends StatelessWidget {
                                         tag: 'listStep',
                                         child: Row(
                                           children: [
-                                            Icon(Icons.map_rounded,
+                                            Icon(Icons.map,
                                                 color: vietmapColor),
                                             SizedBox(width: 10),
                                             Text('Bản đồ'),
@@ -116,7 +119,7 @@ class RoutingBottomPanel extends StatelessWidget {
                                   height: 40,
                                   child: Row(
                                     children: [
-                                      Icon(Icons.navigation_rounded,
+                                      Icon(Icons.navigation_sharp,
                                           color: Colors.white),
                                       SizedBox(width: 10),
                                       Text('Bắt đầu',
@@ -135,29 +138,31 @@ class RoutingBottomPanel extends StatelessWidget {
               }),
           Expanded(
               child: BlocBuilder<RoutingBloc, RoutingState>(
+            bloc: routingBloc,
             buildWhen: (previous, current) =>
-                current is RoutingStateGetDirectionSuccess,
+                current is RoutingStateNativeRouteBuilt,
             builder: (context, state) {
-              if (state is RoutingStateGetDirectionSuccess) {
+              if (state is RoutingStateNativeRouteBuilt) {
                 return ListView.builder(
                   itemBuilder: (_, index) => ListTile(
-                    title: Text(state.routingModel?.paths?[0]
-                            .instructions?[index].text ??
-                        ""),
+                    title: Text(
+                        state.directionRoute?.legs?.first.steps?[index].name ??
+                            ""),
                     subtitle: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const SizedBox(height: 5),
-                        Text(
-                            '${state.routingModel?.paths?[0].instructions?[index].distance?.toString() ?? ''} mét'),
+                        Text(state.directionRoute?.legs?.first.steps?[index]
+                                .distance
+                                ?.distanceToString() ??
+                            ''),
                         const Divider(),
                         const SizedBox(height: 5),
                       ],
                     ),
                   ),
                   itemCount:
-                      state.routingModel?.paths?.first.instructions?.length ??
-                          0,
+                      state.directionRoute?.legs?.first.steps?.length ?? 0,
                 );
               }
               return const SizedBox.shrink();

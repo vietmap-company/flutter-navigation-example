@@ -1,22 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'package:vietmap_flutter_gl/vietmap_flutter_gl.dart';
+import 'package:vietmap_flutter_navigation/embedded/controller.dart';
+import 'package:vietmap_flutter_navigation/models/direction_route.dart';
+import 'package:vietmap_flutter_navigation/models/options.dart';
+import 'package:vietmap_flutter_navigation/models/route_progress_event.dart';
+import 'package:vietmap_flutter_navigation/models/way_point.dart';
+import 'package:vietmap_flutter_navigation/navigation_plugin.dart';
+import 'package:vietmap_flutter_navigation/views/navigation_view.dart';
+import 'package:vietmap_map/constants/colors.dart';
 import 'package:vietmap_map/domain/entities/vietmap_model.dart';
 import 'package:vietmap_map/extension/latlng_extension.dart';
+import 'package:vietmap_map/features/navigation_screen/components/vietmap_banner_instruction_view.dart';
+import 'package:vietmap_map/features/navigation_screen/components/vietmap_bottom_view.dart';
 import 'package:vietmap_map/features/routing_screen/bloc/routing_bloc.dart';
-import 'package:vietmap_map/features/routing_screen/components/routing_bottom_panel.dart';
 import 'package:vietmap_map/features/routing_screen/components/routing_header.dart';
-
-import '../../constants/colors.dart';
-import '../../constants/route.dart';
 import '../../di/app_context.dart';
 import '../map_screen/bloc/map_bloc.dart';
 import '../map_screen/bloc/map_state.dart';
-import '../navigation_screen/models/navigation_params.dart';
-import 'bloc/routing_event.dart';
-import 'bloc/routing_state.dart';
+import '../routing_screen/bloc/routing_event.dart';
+import '../routing_screen/bloc/routing_state.dart';
+import 'components/routing_bottom_panel.dart';
 
 class RoutingScreen extends StatefulWidget {
   const RoutingScreen({super.key});
@@ -26,14 +34,44 @@ class RoutingScreen extends StatefulWidget {
 }
 
 class _RoutingScreenState extends State<RoutingScreen> {
-  VietmapController? _controller;
   bool isFromOrigin = true;
   final PanelController _panelController = PanelController();
-  final List<Marker> _listMarker = [];
   double panelPosition = 0.0;
+
+  MapNavigationViewController? _navigationController;
+  late MapOptions _navigationOption;
+  final _vietmapPlugin = VietMapNavigationPlugin();
+
+  List<WayPoint> wayPoints = [
+    WayPoint(name: "You are here", latitude: 10.759091, longitude: 106.675817),
+    WayPoint(name: "You are here", latitude: 10.762528, longitude: 106.653099)
+  ];
+  Widget instructionImage = const SizedBox.shrink();
+  String guideDirection = "";
+  Widget recenterButton = const SizedBox.shrink();
+  RouteProgressEvent? routeProgressEvent;
+  FocusNode focusNode = FocusNode();
+  bool _isRunning = false;
+
+  Future<void> initialize() async {
+    if (!mounted) return;
+
+    _navigationOption = _vietmapPlugin.getDefaultOptions();
+    _navigationOption.simulateRoute = false;
+    _navigationOption.isCustomizeUI = true;
+
+    _navigationOption.apiKey = AppContext.getVietmapAPIKey() ?? "";
+    _navigationOption.mapStyle = AppContext.getVietmapMapStyleUrl() ?? "";
+
+    _vietmapPlugin.setDefaultOptions(_navigationOption);
+  }
+
+  RoutingBloc get routingBloc => BlocProvider.of<RoutingBloc>(context);
+  MapOptions? options;
   @override
   void initState() {
     super.initState();
+    initialize();
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
       Future.delayed(const Duration(milliseconds: 200))
           .then((value) => _panelController.hide());
@@ -41,185 +79,212 @@ class _RoutingScreenState extends State<RoutingScreen> {
         var args = ModalRoute.of(context)!.settings.arguments as VietmapModel;
         var res = await Geolocator.getCurrentPosition();
         if (!mounted) return;
-        context.read<RoutingBloc>().add(RoutingEventUpdateRouteParams(
+        routingBloc.add(RoutingEventUpdateRouteParams(
             originDescription: 'Vị trí của bạn',
             originPoint: res.toLatLng(),
             destinationDescription: args.name,
             destinationPoint: LatLng(args.lat ?? 0, args.lng ?? 0)));
+      } else {
+        var position = await Geolocator.getCurrentPosition();
+        if (!mounted) return;
+        routingBloc.add(RoutingEventUpdateRouteParams(
+            originDescription: 'Vị trí của bạn',
+            originPoint: LatLng(position.latitude, position.longitude)));
       }
-      var position = await Geolocator.getCurrentPosition();
-      if (!mounted) return;
-      context.read<RoutingBloc>().add(RoutingEventUpdateRouteParams(
-          originDescription: 'Vị trí của bạn',
-          originPoint: LatLng(position.latitude, position.longitude)));
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return BlocListener<RoutingBloc, RoutingState>(
+      bloc: routingBloc,
       listener: (context, state) {
-        if (state is RoutingStateGetDirectionSuccess) {
-          _controller?.clearLines();
-          _controller?.addPolyline(PolylineOptions(
-            geometry: state.listPoint,
-            polylineWidth: 4,
-            polylineColor: vietmapColor,
-          ));
-
-          _controller?.animateCamera(CameraUpdate.newLatLngBounds(
-              state.listPoint.first.latitude < state.listPoint.last.latitude
-                  ? LatLngBounds(
-                      southwest: state.listPoint.first,
-                      northeast: state.listPoint.last)
-                  : LatLngBounds(
-                      northeast: state.listPoint.first,
-                      southwest: state.listPoint.last),
-              left: 0,
-              right: 0,
-              top: 0,
-              bottom: 300));
+        if (state is RoutingStateNativeRouteBuilt && !_isRunning) {
           _panelController.show();
-          setState(() {
-            _listMarker.clear();
-            _listMarker.add(Marker(
-                width: 17,
-                height: 17,
-                child: DecoratedBox(
-                    decoration:
-                        BoxDecoration(shape: BoxShape.circle, boxShadow: [
-                      BoxShadow(color: Colors.grey.shade300, blurRadius: 0.5)
-                    ]),
-                    child: const Icon(Icons.circle,
-                        size: 15, color: Colors.black)),
-                latLng: state.listPoint.first));
-            _listMarker.add(Marker(
-                width: 40,
-                height: 40,
-                alignment: Alignment.bottomCenter,
-                child:
-                    const Icon(Icons.location_pin, size: 42, color: Colors.red),
-                latLng: state.listPoint.last));
-          });
         }
       },
       child: BlocListener<MapBloc, MapState>(
         listener: (context, state) {
           if (state is MapStateGetPlaceDetailSuccess) {
             if (isFromOrigin) {
-              _listMarker.add(Marker(
-                  width: 17,
-                  height: 17,
-                  alignment: Alignment.bottomCenter,
-                  child: DecoratedBox(
-                    decoration:
-                        BoxDecoration(shape: BoxShape.circle, boxShadow: [
-                      BoxShadow(color: Colors.grey.shade300, blurRadius: 0.5)
-                    ]),
-                    child:
-                        const Icon(Icons.circle, size: 15, color: Colors.black),
-                  ),
-                  latLng: LatLng(
-                      state.response.lat ?? 0, state.response.lng ?? 0)));
-              context.read<RoutingBloc>().add(RoutingEventUpdateRouteParams(
+              routingBloc.add(RoutingEventUpdateRouteParams(
                   originDescription: state.response.name,
                   originPoint: LatLng(
                       state.response.lat ?? 0, state.response.lng ?? 0)));
             } else {
-              _listMarker.add(Marker(
-                  width: 40,
-                  height: 40,
-                  alignment: Alignment.bottomCenter,
-                  child: const Icon(Icons.location_pin,
-                      size: 40, color: vietmapColor),
-                  latLng: LatLng(
-                      state.response.lat ?? 0, state.response.lng ?? 0)));
-              context.read<RoutingBloc>().add(RoutingEventUpdateRouteParams(
+              routingBloc.add(RoutingEventUpdateRouteParams(
                   destinationDescription: state.response.name,
                   destinationPoint: LatLng(
                       state.response.lat ?? 0, state.response.lng ?? 0)));
             }
-            _controller?.animateCamera(CameraUpdate.newLatLngZoom(
-                LatLng(state.response.lat ?? 0, state.response.lng ?? 0), 15));
           }
         },
         child: WillPopScope(
           onWillPop: () {
-            context.read<RoutingBloc>().add(RoutingEventClearDirection());
+            if (_isRunning) {
+              showDialog(
+                  context: context,
+                  builder: (_) => AlertDialog(
+                        title: const Text('Thông báo'),
+                        content:
+                            const Text('Bạn có muốn dừng hướng dẫn đi đường?'),
+                        actions: [
+                          TextButton(
+                              onPressed: () {
+                                Navigator.pop(context);
+                              },
+                              child: const Text('Không')),
+                          TextButton(
+                              onPressed: () {
+                                _navigationController?.finishNavigation();
+                                _onStopNavigation();
+                                Navigator.pop(context);
+                              },
+                              child: const Text('Có'))
+                        ],
+                      ));
+              return Future.value(false);
+            }
+            routingBloc.add(RoutingEventClearDirection());
             return Future.value(true);
           },
           child: Scaffold(
             body: Column(children: [
-              RoutingHeader(
-                onOriginTapCallback: () {
-                  setState(() {
-                    isFromOrigin = true;
-                  });
-                },
-                onDestinationTapCallback: () => setState(() {
-                  isFromOrigin = false;
-                }),
-              ),
+              _isRunning
+                  ? const SizedBox.shrink()
+                  : RoutingHeader(
+                      onOriginTapCallback: () {
+                        setState(() {
+                          isFromOrigin = true;
+                        });
+                      },
+                      onDestinationTapCallback: () => setState(() {
+                        isFromOrigin = false;
+                      }),
+                    ),
               Expanded(
                 child: Stack(
                   children: [
-                    VietmapGL(
-                      trackCameraPosition: true,
-                      styleString: AppContext.getVietmapMapStyleUrl() ?? "",
-                      initialCameraPosition: const CameraPosition(
-                          target: LatLng(10.762201, 106.654213), zoom: 10),
-                      onMapCreated: (controller) {
+                    NavigationView(
+                      mapOptions: _navigationOption,
+                      onNewRouteSelected: (DirectionRoute p0) {
+                        routingBloc.add(
+                            RoutingEventNativeRouteBuilt(directionRoute: p0));
+                      },
+                      onMapRendered: () async {
+                        if (ModalRoute.of(context)!.settings.arguments !=
+                            null) {
+                          var args = ModalRoute.of(context)!.settings.arguments
+                              as VietmapModel;
+                          var listWaypoint = <WayPoint>[];
+                          var res = await Geolocator.getCurrentPosition();
+                          listWaypoint.add(WayPoint(
+                              name: '',
+                              latitude: res.toLatLng().latitude,
+                              longitude: res.toLatLng().longitude));
+
+                          listWaypoint.add(WayPoint(
+                              name: '',
+                              latitude: args.lat,
+                              longitude: args.lng));
+                          _navigationController
+                              ?.buildRoute(
+                                  wayPoints: listWaypoint,
+                                  profile: DrivingProfile.drivingTraffic)
+                              .then((value) {});
+                        }
+                      },
+                      onMapCreated: (p0) async {
+                        _navigationController = p0;
+                        routingBloc.add(RoutingEventUpdateRouteParams(
+                            navigationController: _navigationController));
+                      },
+                      onRouteBuilt: (DirectionRoute p0) {
+                        routingBloc.add(
+                            RoutingEventNativeRouteBuilt(directionRoute: p0));
                         setState(() {
-                          _controller = controller;
+                          EasyLoading.dismiss();
                         });
                       },
-                    ),
-                    _controller != null
-                        ? MarkerLayer(
-                            markers: _listMarker, mapController: _controller!)
-                        : const SizedBox.shrink(),
-                    SlidingUpPanel(
-                        parallaxEnabled: true,
-                        parallaxOffset: .6,
-                        controller: _panelController,
-                        minHeight: MediaQuery.of(context).size.height * 0.2,
-                        maxHeight: MediaQuery.of(context).size.height * 0.7,
-                        onPanelSlide: (position) {
-                          setState(() {
-                            panelPosition = position;
-                          });
-                        },
-                        panel: RoutingBottomPanel(
-                          onViewListStep: () {
-                            if (_panelController.panelPosition == 0.0) {
-                              _panelController.animatePanelToPosition(1.0);
-                            } else {
-                              _panelController.animatePanelToPosition(0.0);
-                            }
-                          },
-                          panelPosition: panelPosition,
-                          onStartNavigation: () {
-                            Navigator.pushNamed(
-                                context, Routes.navigationScreen,
-                                arguments: NavigationScreenParams(
-                                  from: context
-                                      .read<RoutingBloc>()
-                                      .state
-                                      .routingParams!
-                                      .originPoint!,
-                                  to: context
-                                      .read<RoutingBloc>()
-                                      .state
-                                      .routingParams!
-                                      .destinationPoint!,
-                                  profile: context
-                                      .read<RoutingBloc>()
-                                      .state
-                                      .routingParams!
-                                      .vehicle,
+                      onMapMove: () => _showRecenterButton(),
+                      onRouteProgressChange:
+                          (RouteProgressEvent routeProgressEvent) {
+                        if (!mounted) return;
+                        _setInstructionImage(routeProgressEvent.currentModifier,
+                            routeProgressEvent.currentModifierType);
+                        setState(() {
+                          this.routeProgressEvent = routeProgressEvent;
+                        });
+                      },
+                      onArrival: () {
+                        showDialog(
+                            barrierDismissible: false,
+                            context: context,
+                            builder: (_) => AlertDialog(
+                                  title: const Text('Thông báo'),
+                                  content: const Text('Bạn đã đến nơi'),
+                                  actions: [
+                                    TextButton(
+                                        onPressed: () {
+                                          Navigator.pop(context);
+                                          Navigator.pop(context);
+                                        },
+                                        child: const Text('OK'))
+                                  ],
                                 ));
-                          },
-                        ))
+                      },
+                    ),
+                    _isRunning
+                        ? Positioned(
+                            top: MediaQuery.of(context).viewPadding.top,
+                            child: VietmapBannerInstructionView(
+                              instructionIcon: instructionImage,
+                              routeProgressEvent: routeProgressEvent,
+                            ),
+                          )
+                        : const SizedBox.shrink(),
+                    _isRunning
+                        ? Positioned(
+                            bottom: 0,
+                            child: VietmapBottomActionView(
+                                controller: _navigationController,
+                                onStopNavigationCallback: () {
+                                  setState(() {
+                                    _isRunning = false;
+                                  });
+                                },
+                                routeProgressEvent: routeProgressEvent,
+                                onOverviewCallback: _showRecenterButton,
+                                recenterButton: recenterButton),
+                          )
+                        : SlidingUpPanel(
+                            parallaxEnabled: true,
+                            parallaxOffset: .6,
+                            controller: _panelController,
+                            minHeight: MediaQuery.of(context).size.height * 0.2,
+                            maxHeight: MediaQuery.of(context).size.height * 0.7,
+                            onPanelSlide: (position) {
+                              setState(() {
+                                panelPosition = position;
+                              });
+                            },
+                            panel: RoutingBottomPanel(
+                              onViewListStep: () {
+                                if (_panelController.panelPosition == 0.0) {
+                                  _panelController.animatePanelToPosition(1.0);
+                                } else {
+                                  _panelController.animatePanelToPosition(0.0);
+                                }
+                              },
+                              panelPosition: panelPosition,
+                              onStartNavigation: () {
+                                _navigationController?.startNavigation();
+                                setState(() {
+                                  _isRunning = true;
+                                });
+                              },
+                              routingBloc: routingBloc,
+                            ))
                   ],
                 ),
               )
@@ -228,5 +293,66 @@ class _RoutingScreenState extends State<RoutingScreen> {
         ),
       ),
     );
+  }
+
+  _showRecenterButton() {
+    recenterButton = TextButton(
+        style: ButtonStyle(overlayColor:
+            MaterialStateProperty.resolveWith<Color>(
+                (Set<MaterialState> states) {
+          return Colors.transparent;
+        })),
+        onPressed: () {
+          _navigationController?.recenter();
+          recenterButton = const SizedBox.shrink();
+        },
+        child: Container(
+            height: 50,
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+            decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(50),
+                color: Colors.white,
+                border: Border.all(color: Colors.black45, width: 1)),
+            child: const Row(
+              children: [
+                Icon(
+                  Icons.keyboard_double_arrow_up_sharp,
+                  size: 35,
+                  color: vietmapColor,
+                ),
+                Text(
+                  'Về giữa',
+                  style: TextStyle(fontSize: 18, color: vietmapColor),
+                )
+              ],
+            )));
+    setState(() {});
+  }
+
+  _setInstructionImage(String? modifier, String? type) {
+    if (modifier != null && type != null) {
+      List<String> data = [
+        type.replaceAll(' ', '_'),
+        modifier.replaceAll(' ', '_')
+      ];
+      String path = 'assets/navigation_symbol/${data.join('_')}.svg';
+      setState(() {
+        instructionImage = SvgPicture.asset(path, color: Colors.white);
+      });
+    }
+  }
+
+  _onStopNavigation() {
+    Navigator.pop(context);
+    setState(() {
+      routeProgressEvent = null;
+      _isRunning = false;
+    });
+  }
+
+  @override
+  void dispose() {
+    _navigationController?.onDispose();
+    super.dispose();
   }
 }
