@@ -1,15 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:vietmap_flutter_gl/vietmap_flutter_gl.dart';
 import 'package:vietmap_map/components/map_action_button.dart';
-import 'package:vietmap_map/extension/latlng_extension.dart';
 import 'package:vietmap_map/features/map_screen/bloc/map_bloc.dart';
-import 'package:vietmap_map/features/navigation_screen/models/navigation_params.dart';
 
 import '../../../constants/colors.dart';
 import '../../../constants/route.dart';
+import '../../routing_screen/models/routing_params_model.dart';
 import '../bloc/map_state.dart';
 
 class BottomSheetInfo extends StatelessWidget {
@@ -78,7 +75,8 @@ class BottomSheetInfo extends StatelessWidget {
                         onPressed: () async {
                           EasyLoading.show();
                           Navigator.pushNamed(context, Routes.routingScreen,
-                              arguments: state.response);
+                              arguments: RoutingParamsModel.fromVietmapModel(
+                                  state.response, false));
                         },
                         child: const Row(
                           children: [
@@ -89,16 +87,10 @@ class BottomSheetInfo extends StatelessWidget {
                         )),
                     const SizedBox(width: 10),
                     MapActionButtonOutline(
-                        onPressed: () async {
-                          var res = await Geolocator.getCurrentPosition();
-
-                          // ignore: use_build_context_synchronously
-                          Navigator.pushNamed(context, Routes.navigationScreen,
-                              arguments: NavigationScreenParams(
-                                from: res.toLatLng(),
-                                to: LatLng(state.response.lat ?? 0,
-                                    state.response.lng ?? 0),
-                              ));
+                        onPressed: () {
+                          Navigator.pushNamed(context, Routes.routingScreen,
+                              arguments: RoutingParamsModel.fromVietmapModel(
+                                  state.response, true));
                         },
                         child: const Row(
                           children: [
@@ -170,7 +162,8 @@ class BottomSheetInfo extends StatelessWidget {
                         onPressed: () async {
                           EasyLoading.show();
                           Navigator.pushNamed(context, Routes.routingScreen,
-                              arguments: state.response);
+                              arguments: RoutingParamsModel.fromVietmapModel(
+                                  state.response, false));
                         },
                         child: const Row(
                           children: [
@@ -181,16 +174,10 @@ class BottomSheetInfo extends StatelessWidget {
                         )),
                     const SizedBox(width: 10),
                     MapActionButtonOutline(
-                        onPressed: () async {
-                          var res = await Geolocator.getCurrentPosition();
-
-                          // ignore: use_build_context_synchronously
-                          Navigator.pushNamed(context, Routes.navigationScreen,
-                              arguments: NavigationScreenParams(
-                                from: res.toLatLng(),
-                                to: LatLng(state.response.lat ?? 0,
-                                    state.response.lng ?? 0),
-                              ));
+                        onPressed: () {
+                          Navigator.pushNamed(context, Routes.routingScreen,
+                              arguments: RoutingParamsModel.fromVietmapModel(
+                                  state.response, true));
                         },
                         child: const Row(
                           children: [

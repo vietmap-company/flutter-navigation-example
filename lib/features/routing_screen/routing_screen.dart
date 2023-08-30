@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_easyloading/flutter_easyloading.dart';
-import 'package:flutter_svg/svg.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart'; 
 import 'package:geolocator/geolocator.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'package:vietmap_flutter_gl/vietmap_flutter_gl.dart';
@@ -15,8 +14,6 @@ import 'package:vietmap_flutter_navigation/views/navigation_view.dart';
 import 'package:vietmap_map/constants/colors.dart';
 import 'package:vietmap_map/domain/entities/vietmap_model.dart';
 import 'package:vietmap_map/extension/latlng_extension.dart';
-import 'package:vietmap_map/features/navigation_screen/components/vietmap_banner_instruction_view.dart';
-import 'package:vietmap_map/features/navigation_screen/components/vietmap_bottom_view.dart';
 import 'package:vietmap_map/features/routing_screen/bloc/routing_bloc.dart';
 import 'package:vietmap_map/features/routing_screen/components/routing_header.dart';
 import '../../di/app_context.dart';
@@ -25,6 +22,9 @@ import '../map_screen/bloc/map_state.dart';
 import '../routing_screen/bloc/routing_event.dart';
 import '../routing_screen/bloc/routing_state.dart';
 import 'components/routing_bottom_panel.dart';
+import 'components/vietmap_banner_instruction_view.dart';
+import 'components/vietmap_bottom_view.dart';
+import 'models/routing_params_model.dart';
 
 class RoutingScreen extends StatefulWidget {
   const RoutingScreen({super.key});
@@ -45,8 +45,7 @@ class _RoutingScreenState extends State<RoutingScreen> {
   List<WayPoint> wayPoints = [
     WayPoint(name: "You are here", latitude: 10.759091, longitude: 106.675817),
     WayPoint(name: "You are here", latitude: 10.762528, longitude: 106.653099)
-  ];
-  Widget instructionImage = const SizedBox.shrink();
+  ]; 
   String guideDirection = "";
   Widget recenterButton = const SizedBox.shrink();
   RouteProgressEvent? routeProgressEvent;
@@ -63,7 +62,6 @@ class _RoutingScreenState extends State<RoutingScreen> {
     _navigationOption.apiKey = AppContext.getVietmapAPIKey() ?? "";
     _navigationOption.mapStyle = AppContext.getVietmapMapStyleUrl() ?? "";
     _navigationOption.padding = const EdgeInsets.all(100);
-    
 
     _vietmapPlugin.setDefaultOptions(_navigationOption);
   }
@@ -173,10 +171,11 @@ class _RoutingScreenState extends State<RoutingScreen> {
                             RoutingEventNativeRouteBuilt(directionRoute: p0));
                       },
                       onMapRendered: () async {
+                        EasyLoading.show();
                         if (ModalRoute.of(context)!.settings.arguments !=
                             null) {
                           var args = ModalRoute.of(context)!.settings.arguments
-                              as VietmapModel;
+                              as RoutingParamsModel;
                           var listWaypoint = <WayPoint>[];
                           var res = await Geolocator.getCurrentPosition();
                           listWaypoint.add(WayPoint(
@@ -188,11 +187,22 @@ class _RoutingScreenState extends State<RoutingScreen> {
                               name: '',
                               latitude: args.lat,
                               longitude: args.lng));
-                          _navigationController
-                              ?.buildRoute(
-                                  wayPoints: listWaypoint,
-                                  profile: DrivingProfile.drivingTraffic)
-                              .then((value) {});
+                          if (args.isStartNavigation) {
+                            _navigationController
+                                ?.buildAndStartNavigation(
+                                    wayPoints: listWaypoint,
+                                    profile: DrivingProfile.drivingTraffic)
+                                .then((value) {
+                              setState(() {
+                                EasyLoading.dismiss();
+                                _isRunning = true;
+                              });
+                            });
+                          } else {
+                            _navigationController?.buildRoute(
+                                wayPoints: listWaypoint,
+                                profile: DrivingProfile.drivingTraffic);
+                          }
                         }
                       },
                       onMapCreated: (p0) async {
@@ -210,9 +220,7 @@ class _RoutingScreenState extends State<RoutingScreen> {
                       onMapMove: () => _showRecenterButton(),
                       onRouteProgressChange:
                           (RouteProgressEvent routeProgressEvent) {
-                        if (!mounted) return;
-                        _setInstructionImage(routeProgressEvent.currentModifier,
-                            routeProgressEvent.currentModifierType);
+                        if (!mounted) return; 
                         setState(() {
                           this.routeProgressEvent = routeProgressEvent;
                         });
@@ -238,8 +246,7 @@ class _RoutingScreenState extends State<RoutingScreen> {
                     _isRunning
                         ? Positioned(
                             top: MediaQuery.of(context).viewPadding.top,
-                            child: VietmapBannerInstructionView(
-                              instructionIcon: instructionImage,
+                            child: VietmapBannerInstructionView( 
                               routeProgressEvent: routeProgressEvent,
                             ),
                           )
@@ -330,18 +337,6 @@ class _RoutingScreenState extends State<RoutingScreen> {
     setState(() {});
   }
 
-  _setInstructionImage(String? modifier, String? type) {
-    if (modifier != null && type != null) {
-      List<String> data = [
-        type.replaceAll(' ', '_'),
-        modifier.replaceAll(' ', '_')
-      ];
-      String path = 'assets/navigation_symbol/${data.join('_')}.svg';
-      setState(() {
-        instructionImage = SvgPicture.asset(path, color: Colors.white);
-      });
-    }
-  }
 
   _onStopNavigation() {
     Navigator.pop(context);

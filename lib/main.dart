@@ -8,7 +8,6 @@ import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:vietmap_map/constants/colors.dart';
-import 'package:vietmap_map/features/navigation_screen/navigation_screen.dart';
 import 'package:vietmap_map/features/pick_address_screen/pick_address_screen.dart';
 import 'package:vietmap_map/features/routing_screen/bloc/routing_bloc.dart';
 import 'package:vietmap_map/features/routing_screen/routing_screen.dart';
@@ -55,7 +54,6 @@ Future<void> main() async {
         Routes.searchScreen: (context) => const SearchScreen(),
         Routes.mapScreen: (context) => const MapScreen(),
         Routes.routingScreen: (context) => const RoutingScreen(),
-        Routes.navigationScreen: (context) => const NavigationScreen(),
         Routes.pickAddressScreen: (context) => const PickAddressScreen(),
         Routes.searchAddressForRoutingScreen: (context) =>
             const SearchAddress(),
