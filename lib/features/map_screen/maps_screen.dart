@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'package:vietmap_flutter_gl/vietmap_flutter_gl.dart';
@@ -32,6 +33,20 @@ class _MapScreenState extends State<MapScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+      EasyLoading.instance
+        ..displayDuration = const Duration(milliseconds: 100)
+        ..animationDuration = const Duration(milliseconds: 100)
+        ..indicatorType = EasyLoadingIndicatorType.fadingCube
+        ..loadingStyle = EasyLoadingStyle.custom
+        ..indicatorSize = 25.0
+        ..radius = 10.0
+        ..progressColor = vietmapColor
+        ..backgroundColor = Colors.white
+        ..indicatorColor = vietmapColor
+        ..textColor = vietmapColor
+        ..maskColor = Colors.grey.withOpacity(0.2)
+        ..userInteractions = true
+        ..dismissOnTap = false;
       Future.delayed(const Duration(milliseconds: 200)).then((value) {
         _panelController.hide();
       });

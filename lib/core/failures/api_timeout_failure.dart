@@ -1,5 +1,3 @@
 import 'failure.dart';
 
-class ApiTimeOutFailure extends Failure{
-
-}
+class ApiTimeOutFailure extends Failure {}

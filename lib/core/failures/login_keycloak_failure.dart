@@ -1,5 +1,3 @@
-
 import 'failure.dart';
 
-class LoginKeyCloakFailure extends Failure{
-}
+class LoginKeyCloakFailure extends Failure {}

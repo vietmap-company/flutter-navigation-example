@@ -3,6 +3,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 
 import 'package:vietmap_map/data/models/vietmap_autocomplete_model.dart';
 import 'package:vietmap_map/data/repository/history_search_repository.dart';
+import '../../constants/constants.dart';
 import '../../core/failures/failure.dart';
 import '../../core/failures/get_file_failure.dart';
 
@@ -20,7 +21,8 @@ class HistorySearchRepositories implements HistorySearchRepository {
   }
   HistorySearchRepositories._internal();
   Future _openBox() async {
-    _personBox = await Hive.openBox<VietmapAutocompleteModel>('history_search');
+    _personBox =
+        await Hive.openBox<VietmapAutocompleteModel>(hiveBoxHistorySearch);
     return;
   }
 

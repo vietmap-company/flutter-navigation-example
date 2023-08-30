@@ -1,4 +1,3 @@
 import 'failure.dart';
 
-class NotFoundFailure extends Failure {
-}
+class NotFoundFailure extends Failure {}
