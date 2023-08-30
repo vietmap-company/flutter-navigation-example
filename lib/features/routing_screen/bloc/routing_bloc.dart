@@ -1,9 +1,12 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:vietmap_flutter_gl/vietmap_flutter_gl.dart';
 import 'package:vietmap_flutter_navigation/models/way_point.dart';
 import 'package:vietmap_map/extension/driving_profile_extension.dart';
+import 'package:vietmap_map/extension/latlng_extension.dart';
 import 'package:vietmap_map/features/routing_screen/bloc/routing_event.dart';
 import 'package:vietmap_map/features/routing_screen/bloc/routing_state.dart';
 
@@ -44,8 +47,8 @@ class RoutingBloc extends Bloc<RoutingEvent, RoutingState> {
           routingModel: VietMapRoutingModel.copyWith(state.routingModel),
           routingParams: params));
       if (params.originPoint != null && params.destinationPoint != null) {
-        add(RoutingEventGetDirection(
-            from: params.originPoint!, to: params.destinationPoint!));
+        // add(RoutingEventGetDirection(
+        //     from: params.originPoint!, to: params.destinationPoint!));
         if (params.navigationController != null) {
           params.navigationController!.buildRoute(wayPoints: [
             WayPoint(
@@ -69,7 +72,7 @@ class RoutingBloc extends Bloc<RoutingEvent, RoutingState> {
   }
 
   _onRoutingEventUpdateRouteParams(
-      RoutingEventUpdateRouteParams event, Emitter<RoutingState> emit) {
+      RoutingEventUpdateRouteParams event, Emitter<RoutingState> emit) async {
     emit(RoutingStateLoading(state));
     VietMapRoutingParams? params = state.routingParams ??
         VietMapRoutingParams(
@@ -80,6 +83,14 @@ class RoutingBloc extends Bloc<RoutingEvent, RoutingState> {
     params.vehicle = event.vehicle ?? params.vehicle;
     params.destinationPoint = event.destinationPoint ?? params.destinationPoint;
     params.originPoint = event.originPoint ?? params.originPoint;
+    try {
+      if (params.originPoint == null) {
+        params.originDescription = 'Vị trí của bạn';
+        params.originPoint = (await Geolocator.getCurrentPosition()).toLatLng();
+      }
+    } catch (e) {
+      debugPrint(e.toString());
+    }
     params.originDescription =
         event.originDescription ?? params.originDescription;
     params.destinationDescription =
@@ -94,6 +105,7 @@ class RoutingBloc extends Bloc<RoutingEvent, RoutingState> {
       add(RoutingEventGetDirection(
           from: params.originPoint!, to: params.destinationPoint!));
       if (params.navigationController != null) {
+        EasyLoading.show();
         params.navigationController!.buildRoute(wayPoints: [
           WayPoint(
               name: '',

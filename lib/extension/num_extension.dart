@@ -24,7 +24,7 @@ extension NumExtension on num? {
 
   String convertNativeResponseSecondsToString() {
     if (this == null) return '';
-    var seconds = this! ;
+    var seconds = this!;
     if (seconds < 60) {
       return '${(seconds).toStringAsFixed(0)} giây';
     } else if (seconds < 3600) {

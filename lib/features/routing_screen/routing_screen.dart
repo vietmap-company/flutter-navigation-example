@@ -62,6 +62,8 @@ class _RoutingScreenState extends State<RoutingScreen> {
 
     _navigationOption.apiKey = AppContext.getVietmapAPIKey() ?? "";
     _navigationOption.mapStyle = AppContext.getVietmapMapStyleUrl() ?? "";
+    _navigationOption.padding = const EdgeInsets.all(100);
+    
 
     _vietmapPlugin.setDefaultOptions(_navigationOption);
   }
@@ -77,20 +79,16 @@ class _RoutingScreenState extends State<RoutingScreen> {
           .then((value) => _panelController.hide());
       if (ModalRoute.of(context)!.settings.arguments != null) {
         var args = ModalRoute.of(context)!.settings.arguments as VietmapModel;
-        var res = await Geolocator.getCurrentPosition();
-        if (!mounted) return;
         routingBloc.add(RoutingEventUpdateRouteParams(
-            originDescription: 'Vị trí của bạn',
-            originPoint: res.toLatLng(),
             destinationDescription: args.name,
             destinationPoint: LatLng(args.lat ?? 0, args.lng ?? 0)));
-      } else {
-        var position = await Geolocator.getCurrentPosition();
-        if (!mounted) return;
-        routingBloc.add(RoutingEventUpdateRouteParams(
-            originDescription: 'Vị trí của bạn',
-            originPoint: LatLng(position.latitude, position.longitude)));
       }
+
+      var position = await Geolocator.getCurrentPosition();
+      if (!mounted) return;
+      routingBloc.add(RoutingEventUpdateRouteParams(
+          originDescription: 'Vị trí của bạn',
+          originPoint: LatLng(position.latitude, position.longitude)));
     });
   }
 
@@ -151,8 +149,11 @@ class _RoutingScreenState extends State<RoutingScreen> {
           child: Scaffold(
             body: Column(children: [
               _isRunning
-                  ? const SizedBox.shrink()
+                  ? const SizedBox.shrink(
+                      key: Key("hide"),
+                    )
                   : RoutingHeader(
+                      key: const Key("routingHeader"),
                       onOriginTapCallback: () {
                         setState(() {
                           isFromOrigin = true;

@@ -25,16 +25,16 @@ class _SearchAddressHeaderState extends State<SearchAddressHeader> {
   final TextEditingController _controller = TextEditingController();
   @override
   void initState() {
+    if (widget.addressText != null &&
+        widget.addressText != 'Vị trí của bạn' &&
+        widget.addressText != 'Vị trí ghim') {
+      _controller.text = widget.addressText!;
+      context
+          .read<MapBloc>()
+          .add(MapEventSearchAddress(address: widget.addressText!));
+    }
     Future.delayed(const Duration(milliseconds: 400)).then((value) {
       _focusNode.requestFocus();
-      if (widget.addressText != null &&
-          widget.addressText != 'Vị trí của bạn' &&
-          widget.addressText != 'Vị trí ghim') {
-        _controller.text = widget.addressText!;
-        context
-            .read<MapBloc>()
-            .add(MapEventSearchAddress(address: widget.addressText!));
-      }
     });
     super.initState();
   }
@@ -76,6 +76,7 @@ class _SearchAddressHeaderState extends State<SearchAddressHeader> {
                               .read<MapBloc>()
                               .add(MapEventSearchAddress(address: value));
                         });
+                        setState(() {});
                       }
                     },
                     focusNode: _focusNode,

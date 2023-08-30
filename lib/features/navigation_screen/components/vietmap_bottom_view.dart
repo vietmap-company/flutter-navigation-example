@@ -32,110 +32,113 @@ class VietmapBottomActionView extends StatelessWidget {
   Widget build(BuildContext context) {
     return routeProgressEvent == null
         ? const SizedBox.shrink()
-        : Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              recenterButton,
-              Container(
-                height: 100,
-                width: MediaQuery.of(context).size.width,
-                decoration: const BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(15),
-                        topRight: Radius.circular(15))),
-                child: Row(children: [
-                  TextButton(
-                      style: ButtonStyle(overlayColor:
-                          MaterialStateProperty.resolveWith<Color>(
-                              (Set<MaterialState> states) {
-                        return Colors.transparent;
-                      })),
-                      onPressed: () {
-                        if (onStopNavigationCallback != null) {
-                          onStopNavigationCallback!();
-                        }
-                        controller?.finishNavigation();
-                      },
-                      child: Container(
-                        height: 50,
-                        width: 50,
-                        decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.white,
-                            border:
-                                Border.all(color: Colors.black45, width: 1)),
-                        child: const Icon(
-                          Icons.close,
-                          color: Colors.black45,
-                          size: 30,
+        : Hero(
+            tag: 'bottomActionView',
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                recenterButton,
+                Container(
+                  height: 100,
+                  width: MediaQuery.of(context).size.width,
+                  decoration: const BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(15),
+                          topRight: Radius.circular(15))),
+                  child: Row(children: [
+                    TextButton(
+                        style: ButtonStyle(overlayColor:
+                            MaterialStateProperty.resolveWith<Color>(
+                                (Set<MaterialState> states) {
+                          return Colors.transparent;
+                        })),
+                        onPressed: () {
+                          if (onStopNavigationCallback != null) {
+                            onStopNavigationCallback!();
+                          }
+                          controller?.finishNavigation();
+                        },
+                        child: Container(
+                          height: 50,
+                          width: 50,
+                          decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.white,
+                              border:
+                                  Border.all(color: Colors.black45, width: 1)),
+                          child: const Icon(
+                            Icons.close,
+                            color: Colors.black45,
+                            size: 30,
+                          ),
+                        )),
+                    Expanded(
+                        child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        FittedBox(
+                          child: Text(
+                            _getTimeArriveRemaining(),
+                            style: TextStyle(
+                                fontSize: 25,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.amber[900]),
+                          ),
                         ),
-                      )),
-                  Expanded(
-                      child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      FittedBox(
-                        child: Text(
-                          _getTimeArriveRemaining(),
-                          style: TextStyle(
-                              fontSize: 25,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.amber[900]),
+                        FittedBox(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                  _calculateTotalDistance(
+                                      routeProgressEvent?.distanceRemaining),
+                                  style: const TextStyle(
+                                      fontSize: 18, color: Colors.black45)),
+                              const SizedBox(width: 10),
+                              const Icon(
+                                Icons.circle_sharp,
+                                size: 5,
+                              ),
+                              const SizedBox(width: 10),
+                              Text(_calculateEstimatedArrivalTime(),
+                                  style: const TextStyle(
+                                      fontSize: 18, color: Colors.black45))
+                            ],
+                          ),
                         ),
-                      ),
-                      FittedBox(
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                                _calculateTotalDistance(
-                                    routeProgressEvent?.distanceRemaining),
-                                style: const TextStyle(
-                                    fontSize: 18, color: Colors.black45)),
-                            const SizedBox(width: 10),
-                            const Icon(
-                              Icons.circle_sharp,
-                              size: 5,
-                            ),
-                            const SizedBox(width: 10),
-                            Text(_calculateEstimatedArrivalTime(),
-                                style: const TextStyle(
-                                    fontSize: 18, color: Colors.black45))
-                          ],
-                        ),
-                      ),
-                    ],
-                  )),
-                  TextButton(
-                      style: ButtonStyle(overlayColor:
-                          MaterialStateProperty.resolveWith<Color>(
-                              (Set<MaterialState> states) {
-                        return Colors.transparent;
-                      })),
-                      onPressed: () {
-                        controller?.overview();
-                        if (onOverviewCallback != null) {
-                          onOverviewCallback!();
-                        }
-                      },
-                      child: Container(
-                        height: 50,
-                        width: 50,
-                        decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.white,
-                            border:
-                                Border.all(color: Colors.black45, width: 1)),
-                        child: const Icon(
-                          Icons.route,
-                          color: Colors.black45,
-                          size: 30,
-                        ),
-                      ))
-                ]),
-              ),
-            ],
+                      ],
+                    )),
+                    TextButton(
+                        style: ButtonStyle(overlayColor:
+                            MaterialStateProperty.resolveWith<Color>(
+                                (Set<MaterialState> states) {
+                          return Colors.transparent;
+                        })),
+                        onPressed: () {
+                          controller?.overview();
+                          if (onOverviewCallback != null) {
+                            onOverviewCallback!();
+                          }
+                        },
+                        child: Container(
+                          height: 50,
+                          width: 50,
+                          decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.white,
+                              border:
+                                  Border.all(color: Colors.black45, width: 1)),
+                          child: const Icon(
+                            Icons.route,
+                            color: Colors.black45,
+                            size: 30,
+                          ),
+                        ))
+                  ]),
+                ),
+              ],
+            ),
           );
   }
 

@@ -1,8 +1,10 @@
 import 'package:hive/hive.dart';
 import 'package:vietmap_map/domain/entities/vietmap_model.dart';
+
+import '../../constants/constants.dart';
 part 'vietmap_autocomplete_model.g.dart';
 
-@HiveType(typeId: 0)
+@HiveType(typeId: vietmapAutocompleteModelAdapterHiveTypeId)
 class VietmapAutocompleteModel extends VietmapModel {
   @HiveField(0)
   String? refId;

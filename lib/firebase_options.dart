@@ -63,7 +63,8 @@ class DefaultFirebaseOptions {
     messagingSenderId: '810599022089',
     projectId: 'vietmap-navigation-sample',
     storageBucket: 'vietmap-navigation-sample.appspot.com',
-    iosClientId: '810599022089-ah8b4pomdcluji6j4ve4m9cc6p31cn86.apps.googleusercontent.com',
+    iosClientId:
+        '810599022089-ah8b4pomdcluji6j4ve4m9cc6p31cn86.apps.googleusercontent.com',
     iosBundleId: 'vn.vietmap.vmnavi',
   );
 }

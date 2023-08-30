@@ -1,4 +1,3 @@
-
 import '../../domain/entities/vietmap_remote_config.dart';
 
 class RemoteConfigModel extends RemoteConfig {
@@ -8,8 +7,6 @@ class RemoteConfigModel extends RemoteConfig {
     return RemoteConfigModel(
         vietmapAPIKey: json['vietmapAPIKey'],
         vietmapBaseUrl: json['vietmapBaseUrl'],
-        vietmapMapStyleUrl: json['vietmapMapStyleUrl']
-    );
-  } 
-  
+        vietmapMapStyleUrl: json['vietmapMapStyleUrl']);
+  }
 }

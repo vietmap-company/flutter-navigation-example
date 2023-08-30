@@ -1,5 +1,3 @@
-
 import 'failure.dart';
 
-class GetFileFailure extends Failure {
-}
+class GetFileFailure extends Failure {}
