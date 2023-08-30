@@ -7,5 +7,6 @@
         "usecase",
         "Vietmap"
     ],
+    "cSpell.language": "en,vi",
     "dart.flutterSdkPath": "/Users/dev/fvm/default/bin"
 }

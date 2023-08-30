@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:vietmap_flutter_navigation/models/constant.dart';
 import 'package:vietmap_flutter_navigation/models/route_progress_event.dart';
 
@@ -8,14 +9,10 @@ class VietmapBannerInstructionView extends StatelessWidget {
   const VietmapBannerInstructionView({
     super.key,
     required this.routeProgressEvent,
-    required this.instructionIcon,
   });
 
   /// this widget use [RouteProgressEvent] to show the direction icon and instruction
   final RouteProgressEvent? routeProgressEvent;
-
-  /// this widget use [instructionIcon] to show the direction icon, allow user show custom instruction icon for each direction
-  final Widget instructionIcon;
 
   @override
   Widget build(BuildContext context) {
@@ -30,10 +27,8 @@ class VietmapBannerInstructionView extends StatelessWidget {
             width: MediaQuery.of(context).size.width - 20,
             child: Row(children: [
               const SizedBox(width: 15),
-              instructionIcon,
-              //  ??
-              //     _getInstructionImage(routeProgressEvent?.currentModifier,
-              //         routeProgressEvent?.currentModifierType),
+              _getInstructionImage(routeProgressEvent?.currentModifier,
+                  routeProgressEvent?.currentModifierType),
               const SizedBox(width: 10),
               Expanded(
                 child: Column(
@@ -90,5 +85,16 @@ class VietmapBannerInstructionView extends StatelessWidget {
       return translationGuide[data.join('_')]?.toLowerCase() ?? '';
     }
     return '';
+  }
+
+  _getInstructionImage(String? modifier, String? type) {
+    if (modifier != null && type != null) {
+      List<String> data = [
+        type.replaceAll(' ', '_'),
+        modifier.replaceAll(' ', '_')
+      ];
+      String path = 'assets/navigation_symbol/${data.join('_')}.svg';
+      return SvgPicture.asset(path, color: Colors.white);
+    }
   }
 }
