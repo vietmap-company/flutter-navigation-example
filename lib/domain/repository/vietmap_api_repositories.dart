@@ -47,7 +47,7 @@ class VietmapApiRepositories implements VietmapApiRepository {
     // try {
     var res = await _dio.get('reverse/v3',
         queryParameters: {'apikey': apiKey, 'lat': lat, 'lng': long});
-
+    
     if (res.statusCode == 200 && res.data.length > 0) {
       var data = VietmapReverseModel.fromJson(res.data[0]);
       return Right(data);

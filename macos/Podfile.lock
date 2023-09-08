@@ -12,19 +12,19 @@ PODS:
   - Firebase/RemoteConfig (10.12.0):
     - Firebase/CoreOnly
     - FirebaseRemoteConfig (~> 10.12.0)
-  - firebase_analytics (10.4.4):
+  - firebase_analytics (10.4.5):
     - Firebase/Analytics (= 10.12.0)
     - firebase_core
     - FlutterMacOS
-  - firebase_core (2.15.0):
+  - firebase_core (2.15.1):
     - Firebase/CoreOnly (~> 10.12.0)
     - FlutterMacOS
-  - firebase_crashlytics (3.3.4):
+  - firebase_crashlytics (3.3.5):
     - Firebase/CoreOnly (~> 10.12.0)
     - Firebase/Crashlytics (~> 10.12.0)
     - firebase_core
     - FlutterMacOS
-  - firebase_remote_config (4.2.4):
+  - firebase_remote_config (4.2.5):
     - Firebase/CoreOnly (~> 10.12.0)
     - Firebase/RemoteConfig (~> 10.12.0)
     - firebase_core
@@ -149,7 +149,7 @@ DEPENDENCIES:
   - firebase_remote_config (from `Flutter/ephemeral/.symlinks/plugins/firebase_remote_config/macos`)
   - FlutterMacOS (from `Flutter/ephemeral`)
   - geolocator_apple (from `Flutter/ephemeral/.symlinks/plugins/geolocator_apple/macos`)
-  - path_provider_foundation (from `Flutter/ephemeral/.symlinks/plugins/path_provider_foundation/macos`)
+  - path_provider_foundation (from `Flutter/ephemeral/.symlinks/plugins/path_provider_foundation/darwin`)
 
 SPEC REPOS:
   trunk:
@@ -184,14 +184,14 @@ EXTERNAL SOURCES:
   geolocator_apple:
     :path: Flutter/ephemeral/.symlinks/plugins/geolocator_apple/macos
   path_provider_foundation:
-    :path: Flutter/ephemeral/.symlinks/plugins/path_provider_foundation/macos
+    :path: Flutter/ephemeral/.symlinks/plugins/path_provider_foundation/darwin
 
 SPEC CHECKSUMS:
   Firebase: 07150e75d142fb9399f6777fa56a187b17f833a0
-  firebase_analytics: ad91208433a0b831884ce0cf7c64a105fea64136
-  firebase_core: ff59797157ca9adda4440071643761b41fcd03b3
-  firebase_crashlytics: 223f1e85437fa85822439e51db3cd0be7dd35b23
-  firebase_remote_config: 14b62e153e9d5299d539e2fd803a4872a3cc5a09
+  firebase_analytics: 9b489de49d018316c4157a0375a735f701310127
+  firebase_core: 559d892df9267acc6b7254d46fb3041866777509
+  firebase_crashlytics: 5c146808f99644445d69c3dc2eb20324717edd00
+  firebase_remote_config: 67cbcd56443f802398fc387dbb0633c4909b381a
   FirebaseABTesting: 09c328e6a86d562b4e1146c8a9073deadc566b77
   FirebaseAnalytics: 0270389efbe3022b54ec4588862dabec3477ee98
   FirebaseCore: f86a1394906b97ac445ae49c92552a9425831bed

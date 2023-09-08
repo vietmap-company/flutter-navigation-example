@@ -61,7 +61,7 @@ Future<void> main() async {
       initialRoute: Routes.mapScreen,
       theme: ThemeData(
           primarySwatch: MaterialColor(
-            0xFF2a5dff,
+            vietmapColor.value,
             <int, Color>{
               50: vietmapColor.withOpacity(0.05),
               100: vietmapColor.withOpacity(0.1),

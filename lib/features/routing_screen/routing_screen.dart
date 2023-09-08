@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_easyloading/flutter_easyloading.dart'; 
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'package:vietmap_flutter_gl/vietmap_flutter_gl.dart';
@@ -45,7 +45,7 @@ class _RoutingScreenState extends State<RoutingScreen> {
   List<WayPoint> wayPoints = [
     WayPoint(name: "You are here", latitude: 10.759091, longitude: 106.675817),
     WayPoint(name: "You are here", latitude: 10.762528, longitude: 106.653099)
-  ]; 
+  ];
   String guideDirection = "";
   Widget recenterButton = const SizedBox.shrink();
   RouteProgressEvent? routeProgressEvent;
@@ -220,7 +220,7 @@ class _RoutingScreenState extends State<RoutingScreen> {
                       onMapMove: () => _showRecenterButton(),
                       onRouteProgressChange:
                           (RouteProgressEvent routeProgressEvent) {
-                        if (!mounted) return; 
+                        if (!mounted) return;
                         setState(() {
                           this.routeProgressEvent = routeProgressEvent;
                         });
@@ -246,7 +246,7 @@ class _RoutingScreenState extends State<RoutingScreen> {
                     _isRunning
                         ? Positioned(
                             top: MediaQuery.of(context).viewPadding.top,
-                            child: VietmapBannerInstructionView( 
+                            child: VietmapBannerInstructionView(
                               routeProgressEvent: routeProgressEvent,
                             ),
                           )
@@ -336,7 +336,6 @@ class _RoutingScreenState extends State<RoutingScreen> {
             )));
     setState(() {});
   }
-
 
   _onStopNavigation() {
     Navigator.pop(context);

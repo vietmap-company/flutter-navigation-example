@@ -17,6 +17,7 @@ class HistorySearchRepositories implements HistorySearchRepository {
     if (!Hive.isAdapterRegistered(0)) {
       Hive.registerAdapter(VietmapAutocompleteModelAdapter());
     }
+
     return _singleton;
   }
   HistorySearchRepositories._internal();
