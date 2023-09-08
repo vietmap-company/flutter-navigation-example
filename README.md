@@ -3,7 +3,7 @@
 
 
 Contact [vietmap.vn](https://bit.ly/vietmap-api) to register a valid key.
-
+## Checkout the [dev branch](https://github.com/vietmap-company/flutter-navigation-example/tree/dev) to clone and run the example app with your key
 ## Getting started
 
 Add library to pubspec.yaml file
