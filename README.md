@@ -1,9 +1,10 @@
 # Vietmap Flutter GL - Flutter map SDK
 [<img src="https://bizweb.dktcdn.net/100/415/690/themes/804206/assets/logo.png?1689561872933" height="40"/> </p>](https://bit.ly/vietmap-api)
 
-
-Contact [vietmap.vn](https://bit.ly/vietmap-api) to register a valid key and map style url.
-
+ 
+Contact [vietmap.vn](https://bit.ly/vietmap-api) to register a valid key.
+## Checkout the [dev branch](https://github.com/vietmap-company/flutter-navigation-example/tree/dev) to clone and run the example app with your key
+ 
 ## Getting started
 This project use [vietmap_flutter_navigation](https://pub.dev/packages/vietmap_flutter_navigation) and [vietmap_flutter_gl](https://pub.dev/packages/vietmap_flutter_gl) to show and navigate on map. Please read the document of these packages before using this package.
 
