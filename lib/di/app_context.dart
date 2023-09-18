@@ -1,31 +1,20 @@
-import '../data/models/vietmap_remote_config_model.dart';
-
 class AppContext {
-  static Map tiles = {};
   static final AppContext _singleton = AppContext._internal();
 
-  static RemoteConfigModel? _remoteConfigModel;
   factory AppContext() {
     return _singleton;
   }
   AppContext._internal();
-  static void setRemoteConfigValue(RemoteConfigModel data) {
-    _remoteConfigModel = data;
-  }
-
-  static RemoteConfigModel? getRemoteConfigValue() {
-    return _remoteConfigModel;
-  }
 
   static String? getVietmapAPIKey() {
-    return _remoteConfigModel?.vietmapAPIKey;
+    return 'YOUR_API_KEY_HERE';
   }
 
   static String? getVietmapBaseUrl() {
-    return _remoteConfigModel?.vietmapBaseUrl;
+    return 'https://maps.vietmap.vn/api/';
   }
 
   static String? getVietmapMapStyleUrl() {
-    return _remoteConfigModel?.vietmapMapStyleUrl;
+    return 'YOUR_MAP_STYLE_URL_HERE';
   }
 }
