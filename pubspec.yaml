@@ -41,6 +41,7 @@ dependencies:
   firebase_core: ^2.15.0  
   firebase_analytics: ^10.4.4
   firebase_remote_config: ^4.2.4
+  flutter_flavorizr: ^2.2.1
 
 dev_dependencies:
   flutter_test:
@@ -60,4 +61,5 @@ flutter:
     - assets/svg/
     - assets/navigation_symbol/
     - shorebird.yaml
+    
 # flutter pub run build_runner build 
