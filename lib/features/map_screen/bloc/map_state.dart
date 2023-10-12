@@ -70,3 +70,10 @@ class MapStateGetHistorySearchError extends MapState {
 
   MapStateGetHistorySearchError(this.message);
 }
+
+class MapStateGetCategoryAddressSuccess extends MapState {
+  final List<VietmapReverseModel> response;
+
+  MapStateGetCategoryAddressSuccess( this.response);
+}
+

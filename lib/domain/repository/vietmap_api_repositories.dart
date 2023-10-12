@@ -43,24 +43,56 @@ class VietmapApiRepositories implements VietmapApiRepository {
 
   @override
   Future<Either<Failure, VietmapReverseModel>> getLocationFromLatLng(
-      {required double lat, required double long}) async {
-    // try {
-    var res = await _dio.get('reverse/v3',
-        queryParameters: {'apikey': apiKey, 'lat': lat, 'lng': long});
-    
-    if (res.statusCode == 200 && res.data.length > 0) {
-      var data = VietmapReverseModel.fromJson(res.data[0]);
-      return Right(data);
-    } else {
-      return const Left(ApiServerFailure('Có lỗi xảy ra'));
+      {required double lat, required double long, int? cats}) async {
+    try {
+      var res = await _dio.get('reverse/v3', queryParameters: {
+        'apikey': apiKey,
+        'lat': lat,
+        'lng': long,
+        'cats': cats
+      });
+
+      if (res.statusCode == 200 && res.data.length > 0) {
+        var data = VietmapReverseModel.fromJson(res.data[0]);
+        return Right(data);
+      } else {
+        return const Left(ApiServerFailure('Có lỗi xảy ra'));
+      }
+    } on DioException catch (ex) {
+      if (ex.type == DioExceptionType.receiveTimeout) {
+        return Left(ApiTimeOutFailure());
+      } else {
+        return Left(ExceptionFailure(ex));
+      }
     }
-    // } on DioException catch (ex) {
-    //   if (ex.type == DioExceptionType.receiveTimeout) {
-    //     return Left(ApiTimeOutFailure());
-    //   } else {
-    //     return Left(ExceptionFailure(ex));
-    //   }
-    // }
+  }
+
+  @override
+  Future<Either<Failure, List<VietmapReverseModel>>> getLocationFromCategory(
+      {required double lat, required double long, int? cats}) async {
+    try {
+      var res = await _dio.get('reverse/v3', queryParameters: {
+        'apikey': apiKey,
+        'lat': lat,
+        'lng': long,
+        'cats': cats,
+        'radius': 1,
+      });
+
+      if (res.statusCode == 200 && res.data.length > 0) {
+        var data = List<VietmapReverseModel>.from(
+            res.data.map((e) => VietmapReverseModel.fromJson(e)));
+        return Right(data);
+      } else {
+        return const Left(ApiServerFailure('Có lỗi xảy ra'));
+      }
+    } on DioException catch (ex) {
+      if (ex.type == DioExceptionType.receiveTimeout) {
+        return Left(ApiTimeOutFailure());
+      } else {
+        return Left(ExceptionFailure(ex));
+      }
+    }
   }
 
   @override

@@ -12,13 +12,14 @@ class GetLocationFromLatLngUseCase
   GetLocationFromLatLngUseCase(this.repository);
   @override
   Future<Either<Failure, VietmapReverseModel>> call(LocationPoint params) {
-    return repository.getLocationFromLatLng(lat: params.lat, long: params.long);
+    return repository.getLocationFromLatLng(
+        lat: params.lat, long: params.long, cats: params.category);
   }
 }
 
 class LocationPoint {
   final double lat;
   final double long;
-
-  LocationPoint({required this.lat, required this.long});
+  final int? category;
+  LocationPoint({required this.lat, required this.long, this.category});
 }

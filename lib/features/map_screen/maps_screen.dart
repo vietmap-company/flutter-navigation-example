@@ -6,6 +6,7 @@ import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'package:vietmap_flutter_gl/vietmap_flutter_gl.dart';
+import 'package:vietmap_map/features/map_screen/components/category_marker.dart';
 
 import '../../constants/colors.dart';
 import '../../constants/route.dart';
@@ -14,6 +15,8 @@ import 'bloc/map_bloc.dart';
 import 'bloc/map_event.dart';
 import 'bloc/map_state.dart';
 import 'components/bottom_info.dart';
+import 'components/category_bar.dart';
+import 'components/search_bar.dart';
 
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key});
@@ -25,6 +28,7 @@ class MapScreen extends StatefulWidget {
 class _MapScreenState extends State<MapScreen> {
   VietmapController? _controller;
   List<Marker> _markers = [];
+  List<Marker> _nearbyMarker = [];
   double panelPosition = 0.0;
   bool isShowMarker = true;
   final PanelController _panelController = PanelController();
@@ -68,6 +72,15 @@ class _MapScreenState extends State<MapScreen> {
   Widget build(BuildContext context) {
     return BlocListener<MapBloc, MapState>(
       listener: (_, state) {
+        if (state is MapStateGetCategoryAddressSuccess) {
+          _nearbyMarker = List<Marker>.from(state.response.map((e) => Marker(
+              width: 120,
+              height: 70,
+              alignment: Alignment.bottomCenter,
+              latLng: LatLng(e.lat ?? 0, e.lng ?? 0),
+              child: CategoryMarker(model: e))));
+          setState(() {});
+        }
         if (state is MapStateGetLocationFromCoordinateSuccess &&
             ModalRoute.of(context)?.isCurrent == true) {
           _markers = [
@@ -88,7 +101,8 @@ class _MapScreenState extends State<MapScreen> {
           ];
           _controller?.animateCamera(
             CameraUpdate.newLatLngZoom(
-                LatLng(state.response.lat ?? 0, state.response.lng ?? 0), 15),
+                LatLng(state.response.lat ?? 0, state.response.lng ?? 0),
+                _controller?.cameraPosition?.zoom ?? 15),
           );
           _panelController.show();
           _showPanel();
@@ -113,7 +127,8 @@ class _MapScreenState extends State<MapScreen> {
           ];
           _controller?.animateCamera(
             CameraUpdate.newLatLngZoom(
-                LatLng(state.response.lat ?? 0, state.response.lng ?? 0), 15),
+                LatLng(state.response.lat ?? 0, state.response.lng ?? 0),
+                _controller?.cameraPosition?.zoom ?? 15),
           );
           _panelController.show();
           _showPanel();
@@ -131,6 +146,10 @@ class _MapScreenState extends State<MapScreen> {
         onWillPop: () async {
           if (_panelController.isPanelShown || _panelController.isPanelOpen) {
             _panelController.hide();
+            setState(() {
+              _markers = [];
+              _nearbyMarker = [];
+            });
             return false;
           }
           return true;
@@ -143,7 +162,7 @@ class _MapScreenState extends State<MapScreen> {
                   myLocationTrackingMode: MyLocationTrackingMode.TrackingGPS,
                   myLocationRenderMode: MyLocationRenderMode.GPS,
                   trackCameraPosition: true,
-                  compassViewMargins: const Point(10, 90),
+                  compassViewMargins: const Point(10, 110),
                   styleString: AppContext.getVietmapMapStyleUrl() ?? "",
                   initialCameraPosition: const CameraPosition(
                       target: LatLng(10.762201, 106.654213), zoom: 10),
@@ -154,6 +173,9 @@ class _MapScreenState extends State<MapScreen> {
                     });
                   },
                   onMapLongClick: (point, coordinates) {
+                    setState(() {
+                      _nearbyMarker = [];
+                    });
                     context
                         .read<MapBloc>()
                         .add(MapEventOnUserLongTapOnMap(coordinates));
@@ -169,7 +191,7 @@ class _MapScreenState extends State<MapScreen> {
                     ? const SizedBox.shrink()
                     : MarkerLayer(
                         mapController: _controller!,
-                        markers: _markers,
+                        markers: _nearbyMarker,
                       ),
                 Positioned(
                   key: const Key('searchBarKey'),
@@ -180,27 +202,12 @@ class _MapScreenState extends State<MapScreen> {
                     },
                     child: Hero(
                       tag: 'searchBar',
-                      child: Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 20),
-                        width: MediaQuery.of(context).size.width - 40,
-                        height: 50,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        alignment: Alignment.center,
-                        child: Row(
-                          children: [
-                            const SizedBox(width: 10),
-                            Image.asset(
-                              'assets/images/vietmap.jpg',
-                              width: 25,
-                              height: 25,
-                            ),
-                            const SizedBox(width: 10),
-                            const Text('Nhập từ khoá để tìm kiếm')
-                          ],
-                        ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const FloatingSearchBar(),
+                          CategoryBar(controller: _controller),
+                        ],
                       ),
                     ),
                   ),
