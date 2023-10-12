@@ -41,6 +41,7 @@ class HistorySearchRepositories implements HistorySearchRepository {
         }
       }
       _personBox?.add(recentSearch);
+      
       _personBox?.close();
       return const Right(true);
     } catch (e) {
@@ -53,6 +54,7 @@ class HistorySearchRepositories implements HistorySearchRepository {
       getHistorySearch() async {
     try {
       await _openBox();
+
       final List<VietmapAutocompleteModel> list =
           List<VietmapAutocompleteModel>.from(_personBox?.values ?? []);
       _personBox?.close();
