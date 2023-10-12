@@ -28,7 +28,7 @@ dependencies:
   sliding_up_panel: ^2.0.0+1
   flutter_polyline_points: ^1.0.0
   equatable: ^2.0.5
-  vietmap_flutter_navigation: ^1.1.8
+  vietmap_flutter_navigation: ^1.2.2
   vietmap_flutter_gl: ^1.1.3
   hive: ^2.2.3
   hive_flutter: ^1.1.0 
@@ -47,7 +47,7 @@ dev_dependencies:
     sdk: flutter
   hive_generator: ^2.0.1
   build_runner: ^2.4.6
-
+  flutter_launcher_icons: ^0.11.0
   flutter_lints: ^2.0.0
  
 flutter:
@@ -60,4 +60,13 @@ flutter:
     - assets/svg/
     - assets/navigation_symbol/
     - shorebird.yaml
+    - assets/images/vm_demo.png
 # flutter pub run build_runner build 
+
+
+flutter_icons:
+  android: false #"launcher_icon"
+  ios: true
+  image_path: "assets/images/vm_demo.png"
+  remove_alpha_ios: true
+  min_sdk_android: 21 # android min sdk min:16, default 21

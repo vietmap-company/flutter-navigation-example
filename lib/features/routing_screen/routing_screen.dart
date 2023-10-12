@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_easyloading/flutter_easyloading.dart'; 
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'package:vietmap_flutter_gl/vietmap_flutter_gl.dart';
@@ -14,13 +13,11 @@ import 'package:vietmap_flutter_navigation/views/navigation_view.dart';
 import 'package:vietmap_map/constants/colors.dart';
 import 'package:vietmap_map/domain/entities/vietmap_model.dart';
 import 'package:vietmap_map/extension/latlng_extension.dart';
-import 'package:vietmap_map/features/routing_screen/bloc/routing_bloc.dart';
 import 'package:vietmap_map/features/routing_screen/components/routing_header.dart';
 import '../../di/app_context.dart';
 import '../map_screen/bloc/map_bloc.dart';
 import '../map_screen/bloc/map_state.dart';
-import '../routing_screen/bloc/routing_event.dart';
-import '../routing_screen/bloc/routing_state.dart';
+import 'bloc/bloc.dart';
 import 'components/routing_bottom_panel.dart';
 import 'components/vietmap_banner_instruction_view.dart';
 import 'components/vietmap_bottom_view.dart';
@@ -45,7 +42,7 @@ class _RoutingScreenState extends State<RoutingScreen> {
   List<WayPoint> wayPoints = [
     WayPoint(name: "You are here", latitude: 10.759091, longitude: 106.675817),
     WayPoint(name: "You are here", latitude: 10.762528, longitude: 106.653099)
-  ]; 
+  ];
   String guideDirection = "";
   Widget recenterButton = const SizedBox.shrink();
   RouteProgressEvent? routeProgressEvent;
@@ -220,7 +217,7 @@ class _RoutingScreenState extends State<RoutingScreen> {
                       onMapMove: () => _showRecenterButton(),
                       onRouteProgressChange:
                           (RouteProgressEvent routeProgressEvent) {
-                        if (!mounted) return; 
+                        if (!mounted) return;
                         setState(() {
                           this.routeProgressEvent = routeProgressEvent;
                         });
@@ -246,7 +243,7 @@ class _RoutingScreenState extends State<RoutingScreen> {
                     _isRunning
                         ? Positioned(
                             top: MediaQuery.of(context).viewPadding.top,
-                            child: VietmapBannerInstructionView( 
+                            child: VietmapBannerInstructionView(
                               routeProgressEvent: routeProgressEvent,
                             ),
                           )
@@ -336,7 +333,6 @@ class _RoutingScreenState extends State<RoutingScreen> {
             )));
     setState(() {});
   }
-
 
   _onStopNavigation() {
     Navigator.pop(context);
