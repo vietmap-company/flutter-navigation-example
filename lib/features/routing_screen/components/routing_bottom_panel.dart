@@ -1,10 +1,8 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter/material.dart'; 
 import 'package:vietmap_map/extension/num_extension.dart';
 
 import '../../../constants/colors.dart';
-import '../bloc/routing_bloc.dart';
-import '../bloc/routing_state.dart';
+import '../bloc/bloc.dart'; 
 
 class RoutingBottomPanel extends StatelessWidget {
   const RoutingBottomPanel(

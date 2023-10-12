@@ -11,7 +11,7 @@ import '../models/vietmap_autocomplete_model.dart';
 
 abstract class VietmapApiRepository {
   Future<Either<Failure, VietmapReverseModel>> getLocationFromLatLng(
-      {required double lat, required double long});
+      {required double lat, required double long, int? cats});
 
   Future<Either<Failure, List<VietmapAutocompleteModel>>> searchLocation(
       String keySearch);
@@ -20,4 +20,7 @@ abstract class VietmapApiRepository {
 
   Future<Either<Failure, VietMapRoutingModel>> findRoute(
       VietMapRoutingParams params);
+
+  Future<Either<Failure, List<VietmapReverseModel>>> getLocationFromCategory(
+      {required double lat, required double long, int? cats});
 }
