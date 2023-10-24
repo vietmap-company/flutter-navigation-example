@@ -60,7 +60,7 @@
 	<key>VietMapAccessToken</key>
 	<string>YOUR_API_KEY_HERE</string>
 	<key>VietMapURL</key>
-	<string>YOUR_MAP_STYLE_URL_HERE</string>
+	<string>https://maps.vietmap.vn/api/maps/light/styles.json?apikey=YOUR_API_KEY_HERE</string>
 	<key>com.apple.security.network.client</key>
 	<true/>
 </dict>
