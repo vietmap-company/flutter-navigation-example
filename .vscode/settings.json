@@ -1,8 +1,10 @@
 {
     "cSpell.words": [
+        "debouncer",
         "easyloading",
         "Geolocator",
         "latlng",
+        "LTRB",
         "Polyline",
         "usecase",
         "Vietmap"

@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
+import 'package:talker/talker.dart';
 import 'package:vietmap_flutter_gl/vietmap_flutter_gl.dart';
 import 'package:vietmap_map/features/map_screen/components/category_marker.dart';
 
@@ -32,10 +33,13 @@ class _MapScreenState extends State<MapScreen> {
   double panelPosition = 0.0;
   bool isShowMarker = true;
   final PanelController _panelController = PanelController();
-  Position? position;
+  // Position? position;
+
+  final talker = Talker();
   @override
   void initState() {
     super.initState();
+    talker.enable();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       EasyLoading.instance
         ..displayDuration = const Duration(milliseconds: 100)
@@ -59,12 +63,12 @@ class _MapScreenState extends State<MapScreen> {
           res != LocationPermission.whileInUse) {
         await Geolocator.requestPermission();
       }
-      Geolocator.getPositionStream().listen((event) {
-        setState(() {
-          position = event;
-          debugPrint(position!.heading.toString());
-        });
-      });
+      // Geolocator.getPositionStream().listen((event) {
+      //   setState(() {
+      //     position = event;
+      //     talker.info(position!.heading.toString());
+      //   });
+      // });
     });
   }
 
@@ -142,17 +146,17 @@ class _MapScreenState extends State<MapScreen> {
           ));
         }
       },
-      child: WillPopScope(
-        onWillPop: () async {
+      child: PopScope(
+        onPopInvoked: (bool onPopInvoked) async {
           if (_panelController.isPanelShown || _panelController.isPanelOpen) {
             _panelController.hide();
             setState(() {
               _markers = [];
               _nearbyMarker = [];
             });
-            return false;
+          } else {
+            Navigator.pop(context);
           }
-          return true;
         },
         child: Scaffold(
             body: Stack(
@@ -170,6 +174,42 @@ class _MapScreenState extends State<MapScreen> {
                     setState(() {
                       _controller = controller;
                     });
+                  },
+                  onMapClick: (point, coordinates) async {
+                    _panelController.hide();
+                    setState(() {
+                      _markers = [];
+                      _nearbyMarker = [];
+                    });
+                    var response =
+                        await _controller?.queryRenderedFeatures(point: point);
+
+                    for (var item in response ?? []) {
+                      talker.good(item);
+
+                      String? shortName = item?['properties']?['shortname'];
+                      String? name = item?['properties']?['name'];
+                      String? prefix = item?['properties']?['prefix'];
+                      var latLng = item?['geometry']?['coordinates'];
+                      var type = item?['geometry']?['type'];
+
+                      if ((shortName != null || name != null) &&
+                          latLng != null) {
+                        if (!mounted) return;
+                        String? nameWithPrefix =
+                            ('${prefix ?? ''} ${name ?? ''}').trim();
+                        if (type == 'Point') {
+                          context.read<MapBloc>().add(
+                              MapEventUserClickOnMapPoint(
+                                  placeShortName: shortName ?? nameWithPrefix,
+                                  placeName: nameWithPrefix,
+                                  coordinate:
+                                      LatLng(latLng.last, latLng.first)));
+                        }
+                        break;
+                      }
+                    }
+                    // talker.info(response);
                   },
                   onMapLongClick: (point, coordinates) {
                     setState(() {

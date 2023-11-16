@@ -46,3 +46,14 @@ class MapEventShowPlaceDetail extends MapEvent {
 
   MapEventShowPlaceDetail(this.model);
 }
+
+class MapEventUserClickOnMapPoint extends MapEvent {
+  final String placeName;
+  final LatLng coordinate;
+  final String placeShortName;
+
+  MapEventUserClickOnMapPoint(
+      {required this.placeName,
+      required this.placeShortName,
+      required this.coordinate});
+}

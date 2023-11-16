@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:talker/talker.dart';
 import 'package:vietmap_flutter_gl/vietmap_flutter_gl.dart';
 import 'package:vietmap_map/components/debouncer_search.dart';
 import 'package:vietmap_map/features/map_screen/bloc/map_state.dart';
@@ -21,6 +22,7 @@ class _PickAddressScreenState extends State<PickAddressScreen> {
   late PreferredSizeWidget appBar;
   final Debounce _debounce =
       Debounce(delay: const Duration(milliseconds: 1000));
+  final talker = Talker();
   @override
   void initState() {
     appBar = AppBar(
@@ -75,7 +77,7 @@ class _PickAddressScreenState extends State<PickAddressScreen> {
                         MapEventGetAddressFromCoordinate(
                             coordinate: _controller!.cameraPosition!.target));
                   } catch (e) {
-                    debugPrint(e.toString());
+                    talker.handle(e.toString());
                   }
                 }
               });

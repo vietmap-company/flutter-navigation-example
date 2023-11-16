@@ -4,6 +4,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:talker/talker.dart';
 
 const String hiveBoxHistorySearch = 'history_search';
 const int vietmapAutocompleteModelAdapterHiveTypeId = 0;
@@ -32,8 +33,8 @@ Future<ui.Image> widgetToUiImage(
       MediaQuery(
           data: MediaQuery.of(context),
           child: Material(
-            child: child,
             color: Colors.transparent,
+            child: child,
           )),
     );
   }
@@ -110,7 +111,7 @@ Future<ui.Image> widgetToUiImage(
         pixelRatio: pixelRatio ?? (imageSize.width / logicalSize.width));
 
     ///
-    ///This delay sholud increas with Widget tree Size
+    ///This delay should increase with Widget tree Size
     ///
 
     await Future.delayed(delay);
@@ -135,7 +136,7 @@ Future<ui.Image> widgetToUiImage(
     retryCounter--;
 
     ///
-    ///retry untill capture is successfull
+    ///retry until capture is successful
     ///
   } while (isDirty && retryCounter >= 0);
   try {
@@ -144,7 +145,9 @@ Future<ui.Image> widgetToUiImage(
     //   rootElement.deactivateChild(element);
     // });
     buildOwner.finalizeTree();
-  } catch (e) {}
+  } catch (e) {
+    Talker().error(e.toString());
+  }
 
   return image; // Adapted to directly return the image and not the Uint8List
 }

@@ -7,7 +7,7 @@ import 'package:vietmap_map/features/routing_screen/routing_screen.dart';
 import 'package:vietmap_map/features/routing_screen/search_address.dart';
 import 'package:vietmap_map/features/search_screen/search_screen.dart';
 
-import 'constants/route.dart'; 
+import 'constants/route.dart';
 import 'features/map_screen/bloc/bloc.dart';
 import 'features/map_screen/maps_screen.dart';
 import 'features/routing_screen/bloc/bloc.dart';
@@ -31,6 +31,7 @@ Future<void> main() async {
       },
       initialRoute: Routes.mapScreen,
       theme: ThemeData(
+          useMaterial3: false,
           primarySwatch: MaterialColor(
             vietmapColor.value,
             <int, Color>{

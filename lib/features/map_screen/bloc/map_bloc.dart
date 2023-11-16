@@ -3,6 +3,7 @@ import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 // import 'package:geolocator/geolocator.dart';
 import 'package:vietmap_flutter_gl/vietmap_flutter_gl.dart';
+import 'package:vietmap_map/data/models/vietmap_reverse_model.dart';
 import 'package:vietmap_map/domain/repository/history_search_repositories.dart';
 import 'package:vietmap_map/domain/repository/vietmap_api_repositories.dart';
 import 'package:vietmap_map/domain/usecase/search_address_usecase.dart';
@@ -28,6 +29,18 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     on<MapEventGetHistorySearch>(_onMapEventGetHistorySearch);
     on<MapEventGetAddressFromCategory>(_onMapEventGetAddressFromCategory);
     on<MapEventShowPlaceDetail>(_onMapEventShowPlaceDetail);
+    on<MapEventUserClickOnMapPoint>(_onMapEventUserClickOnMapPoint);
+  }
+
+  _onMapEventUserClickOnMapPoint(
+      MapEventUserClickOnMapPoint event, Emitter<MapState> emit) async {
+    emit(MapStateLoading());
+    VietmapReverseModel r = VietmapReverseModel(
+        lat: event.coordinate.latitude,
+        lng: event.coordinate.longitude,
+        address: event.placeName,
+        name: event.placeShortName);
+    emit(MapStateGetLocationFromCoordinateSuccess(r));
   }
 
   _onMapEventShowPlaceDetail(

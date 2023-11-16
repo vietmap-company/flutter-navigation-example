@@ -1,8 +1,8 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:talker/talker.dart';
 import 'package:vietmap_flutter_gl/vietmap_flutter_gl.dart';
 import 'package:vietmap_flutter_navigation/models/way_point.dart';
 import 'package:vietmap_map/extension/driving_profile_extension.dart';
@@ -17,6 +17,7 @@ import '../../../domain/repository/vietmap_api_repositories.dart';
 import '../../../domain/usecase/get_direction_usecase.dart';
 
 class RoutingBloc extends Bloc<RoutingEvent, RoutingState> {
+  final talker = Talker();
   RoutingBloc() : super(RoutingStateInitial()) {
     on<RoutingEventGetDirection>(_onRoutingEventGetDirection);
     on<RoutingEventUpdateRouteParams>(_onRoutingEventUpdateRouteParams);
@@ -95,7 +96,7 @@ class RoutingBloc extends Bloc<RoutingEvent, RoutingState> {
         params.originPoint = (await Geolocator.getCurrentPosition()).toLatLng();
       }
     } catch (e) {
-      debugPrint(e.toString());
+      talker.handle(e.toString());
     }
     if (params.originPoint != null && params.destinationPoint != null) {
       emit(RoutingState(
