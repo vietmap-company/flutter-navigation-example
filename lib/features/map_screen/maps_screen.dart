@@ -159,14 +159,13 @@ class _MapScreenState extends State<MapScreen> {
               children: [
                 VietmapGL(
                   myLocationEnabled: true,
-                  myLocationTrackingMode: MyLocationTrackingMode.TrackingGPS,
-                  myLocationRenderMode: MyLocationRenderMode.GPS,
+                  myLocationTrackingMode: MyLocationTrackingMode.Tracking,
+                  myLocationRenderMode: MyLocationRenderMode.NORMAL,
                   trackCameraPosition: true,
-                  compassViewMargins: const Point(10, 110),
+                  compassViewMargins: const Point(10, 130),
                   styleString: AppContext.getVietmapMapStyleUrl() ?? "",
                   initialCameraPosition: const CameraPosition(
                       target: LatLng(10.762201, 106.654213), zoom: 10),
-                  onUserLocationUpdated: (location) {},
                   onMapCreated: (controller) {
                     setState(() {
                       _controller = controller;

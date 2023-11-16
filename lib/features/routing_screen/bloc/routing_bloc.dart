@@ -83,6 +83,12 @@ class RoutingBloc extends Bloc<RoutingEvent, RoutingState> {
     params.vehicle = event.vehicle ?? params.vehicle;
     params.destinationPoint = event.destinationPoint ?? params.destinationPoint;
     params.originPoint = event.originPoint ?? params.originPoint;
+    params.originDescription =
+        event.originDescription ?? params.originDescription;
+    params.destinationDescription =
+        event.destinationDescription ?? params.destinationDescription;
+    params.navigationController =
+        event.navigationController ?? params.navigationController;
     try {
       if (params.originPoint == null) {
         params.originDescription = 'Vị trí của bạn';
@@ -91,12 +97,6 @@ class RoutingBloc extends Bloc<RoutingEvent, RoutingState> {
     } catch (e) {
       debugPrint(e.toString());
     }
-    params.originDescription =
-        event.originDescription ?? params.originDescription;
-    params.destinationDescription =
-        event.destinationDescription ?? params.destinationDescription;
-    params.navigationController =
-        event.navigationController ?? params.navigationController;
     if (params.originPoint != null && params.destinationPoint != null) {
       emit(RoutingState(
           listPoint: <LatLng>[...(state.listPoint ?? [])],

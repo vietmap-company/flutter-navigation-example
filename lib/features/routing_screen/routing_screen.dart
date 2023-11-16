@@ -55,7 +55,6 @@ class _RoutingScreenState extends State<RoutingScreen> {
     _navigationOption = _vietmapPlugin.getDefaultOptions();
     _navigationOption.simulateRoute = false;
     _navigationOption.isCustomizeUI = true;
-
     _navigationOption.apiKey = AppContext.getVietmapAPIKey() ?? "";
     _navigationOption.mapStyle = AppContext.getVietmapMapStyleUrl() ?? "";
     _navigationOption.padding = const EdgeInsets.all(100);
@@ -201,6 +200,7 @@ class _RoutingScreenState extends State<RoutingScreen> {
                                 profile: DrivingProfile.drivingTraffic);
                           }
                         }
+                        EasyLoading.dismiss();
                       },
                       onMapCreated: (p0) async {
                         _navigationController = p0;

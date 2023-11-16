@@ -15,6 +15,6 @@ class AppContext {
   }
 
   static String? getVietmapMapStyleUrl() {
-    return 'YOUR_MAP_STYLE_URL_HERE';
+    return 'https://maps.vietmap.vn/api/maps/light/styles.json?apikey=YOUR_API_KEY_HERE';
   }
 }

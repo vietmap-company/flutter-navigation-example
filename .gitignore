@@ -36,13 +36,8 @@ pubspec.lock
 **/ios/Podfile.lock
 **/ios/firebase_app_id_file.json
 **/ios/Runner/GoogleService-Info.plist
-<<<<<<< HEAD
-# **/ios/Runner/Info.plist
-vietmap_map
-=======
 **/ios/Runner/Info.plist
 /vietmap_map
->>>>>>> b30af36956597294bf9fe2264fe4122f81515dee
 vietmap_map.pub
 vm_deploy
 vm_deploy.pub
