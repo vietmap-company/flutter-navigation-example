@@ -1,5 +1,4 @@
 import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
@@ -8,7 +7,6 @@ import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'package:talker/talker.dart';
 import 'package:vietmap_flutter_gl/vietmap_flutter_gl.dart';
 import 'package:vietmap_map/features/map_screen/components/category_marker.dart';
-
 import '../../constants/colors.dart';
 import '../../constants/route.dart';
 import '../../di/app_context.dart';
@@ -34,7 +32,6 @@ class _MapScreenState extends State<MapScreen> {
   bool isShowMarker = true;
   final PanelController _panelController = PanelController();
   // Position? position;
-
   final talker = Talker();
   @override
   void initState() {
@@ -42,7 +39,7 @@ class _MapScreenState extends State<MapScreen> {
     talker.enable();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       EasyLoading.instance
-        ..displayDuration = const Duration(milliseconds: 100)
+        ..displayDuration = const Duration(milliseconds: 500)
         ..animationDuration = const Duration(milliseconds: 100)
         ..indicatorType = EasyLoadingIndicatorType.fadingCube
         ..loadingStyle = EasyLoadingStyle.custom
@@ -89,8 +86,8 @@ class _MapScreenState extends State<MapScreen> {
             ModalRoute.of(context)?.isCurrent == true) {
           _markers = [
             Marker(
-                width: 40,
-                height: 40,
+                width: 120,
+                height: 70,
                 alignment: Alignment.bottomCenter,
                 latLng:
                     LatLng(state.response.lat ?? 0, state.response.lng ?? 0),
@@ -99,8 +96,10 @@ class _MapScreenState extends State<MapScreen> {
                     _panelController.show();
                     _showPanel();
                   },
-                  child: const Icon(Icons.location_pin,
-                      size: 40, color: Colors.red),
+                  child: CategoryMarker(
+                    model: state.response,
+                    color: Colors.red,
+                  ),
                 )),
           ];
           _controller?.animateCamera(
@@ -224,13 +223,13 @@ class _MapScreenState extends State<MapScreen> {
                     ? const SizedBox.shrink()
                     : MarkerLayer(
                         mapController: _controller!,
-                        markers: _markers,
+                        markers: _nearbyMarker,
                       ),
                 _controller == null
                     ? const SizedBox.shrink()
                     : MarkerLayer(
                         mapController: _controller!,
-                        markers: _nearbyMarker,
+                        markers: _markers,
                       ),
                 Positioned(
                   key: const Key('searchBarKey'),
