@@ -145,17 +145,17 @@ class _MapScreenState extends State<MapScreen> {
           ));
         }
       },
-      child: PopScope(
-        onPopInvoked: (bool onPopInvoked) async {
+      child: WillPopScope(
+        onWillPop: () async {
           if (_panelController.isPanelShown || _panelController.isPanelOpen) {
             _panelController.hide();
             setState(() {
               _markers = [];
               _nearbyMarker = [];
             });
-          } else {
-            Navigator.pop(context);
+            return false;
           }
+          return true;
         },
         child: Scaffold(
             body: Stack(
