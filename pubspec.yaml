@@ -27,19 +27,16 @@ dependencies:
   flutter_bloc: ^8.1.3
   sliding_up_panel: ^2.0.0+1
   flutter_polyline_points: ^1.0.0
-  equatable: ^2.0.5
-  # vietmap_flutter_navigation: 
-  #   git:
-  #     url: https://github.com/vietmap-company/vietmap-flutter-navigation
-  #     ref: upgradeNativeSDK
-  vietmap_flutter_gl: ^1.2.1
+  equatable: ^2.0.5 
+  vietmap_flutter_gl: ^1.3.0
   hive: ^2.2.3
   hive_flutter: ^1.1.0 
   floating: ^2.0.1
+  
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2
-  vietmap_flutter_navigation: ^1.3.2
+  vietmap_flutter_navigation: ^1.4.1
   talker: ^3.1.4
 
 dev_dependencies:
