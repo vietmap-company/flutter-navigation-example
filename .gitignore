@@ -42,6 +42,9 @@ vietmap_map.pub
 vm_deploy
 vm_deploy.pub
 
+# Flutter Version Management
+.fvmrc
+
 # Symbolication related
 app.*.symbols
 

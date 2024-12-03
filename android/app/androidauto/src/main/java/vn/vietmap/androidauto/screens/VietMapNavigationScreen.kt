@@ -8,6 +8,7 @@ import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.car.app.CarContext
+import androidx.car.app.OnScreenResultListener
 import androidx.car.app.Screen
 import androidx.car.app.ScreenManager
 import androidx.car.app.SurfaceCallback
@@ -25,6 +26,8 @@ import vn.vietmap.androidauto.car_surface.VietMapAndroidAutoSurface
 import vn.vietmap.androidauto.helper.VietMapCarSurfaceHelper
 import vn.vietmap.androidauto.helper.VietMapNavigationHelper
 import vn.vietmap.androidauto.model.CurrentCenterPoint
+import vn.vietmap.androidauto.model.PlaceDetail
+import vn.vietmap.androidauto.model.PlaceItem
 import vn.vietmap.services.android.navigation.ui.v5.camera.CameraOverviewCancelableCallback
 import vn.vietmap.services.android.navigation.ui.v5.listeners.BannerInstructionsListener
 import vn.vietmap.services.android.navigation.ui.v5.listeners.NavigationListener
@@ -155,6 +158,7 @@ class VietMapNavigationScreen(
             navigationMapRoute?.removeRoute()
         }
         currentRoute = null
+        invalidate()
     }
 
     override fun stopNavigation() {
@@ -178,7 +182,15 @@ class VietMapNavigationScreen(
     override fun pushToSearchScreen() {
         val screenManager: ScreenManager =
             carContext.getCarService(ScreenManager::class.java)
-        screenManager.push(VietMapSearchScreen(carContext))
+        screenManager.pushForResult(VietMapSearchScreen(carContext), OnScreenResultListener {
+            result ->
+            if(result != null && result is PlaceDetail){
+                Log.d("VietMapNavigationScreen", "PlaceDetail: $result")
+                destinationPoint = Point.fromLngLat(result.lng, result.lat)
+                clearRoute()
+                fetchRouteWithBearing(false, profile)
+            }
+        })
     }
 
     override fun startNavigation() {
