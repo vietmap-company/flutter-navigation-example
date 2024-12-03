@@ -26,6 +26,7 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import timber.log.Timber.Forest.e
+import vn.vietmap.androidauto.helper.VietMapNavigationHelper
 import vn.vietmap.vietmapsdk.Vietmap
 import vn.vietmap.vietmapsdk.constants.VietMapConstants
 import vn.vietmap.vietmapsdk.maps.MapView
@@ -34,7 +35,6 @@ import vn.vietmap.vietmapsdk.maps.Style
 import vn.vietmap.vietmapsdk.maps.VietMapGL
 import vn.vietmap.vietmapsdk.maps.VietMapGLOptions
 import kotlin.math.ln
-import kotlin.system.exitProcess
 
 class VietMapAndroidAutoSurface(private val mCarContext: CarContext, lifecycle: Lifecycle) :
     DefaultLifecycleObserver {
@@ -46,12 +46,16 @@ class VietMapAndroidAutoSurface(private val mCarContext: CarContext, lifecycle: 
     private var isMoving = false
     private var scaleAnimator: Animator? = null
     private var vietMapGL: VietMapGL? = null
+    private var isSurfaceAvailable = false
     private var listSurfaceCallback = mutableListOf<SurfaceCallback>()
+    private var styleBuilder: Style.Builder? = null
+    private var onStyleLoadedCallback: Style.OnStyleLoaded? = null
+    private var onMapReadyCallback: OnMapReadyCallback? = null
     private val mSurfaceCallback: SurfaceCallback = object : SurfaceCallback {
         override fun onSurfaceAvailable(surfaceContainer: SurfaceContainer) {
-            for (surfaceCallback in listSurfaceCallback) {
-                surfaceCallback.onSurfaceAvailable(surfaceContainer)
-            }
+
+            Log.d("VietMapAndroidAutoSurface", "onSurfaceAvailable")
+
             synchronized(this@VietMapAndroidAutoSurface) {
 
                 if (mSurface != null) {
@@ -60,6 +64,11 @@ class VietMapAndroidAutoSurface(private val mCarContext: CarContext, lifecycle: 
                 mSurface = surfaceContainer.surface
                 doRenderFrame()
             }
+
+            for (surfaceCallback in listSurfaceCallback) {
+                surfaceCallback.onSurfaceAvailable(surfaceContainer)
+            }
+            isSurfaceAvailable = true
         }
 
 
@@ -82,12 +91,11 @@ class VietMapAndroidAutoSurface(private val mCarContext: CarContext, lifecycle: 
         }
 
         override fun onSurfaceDestroyed(surfaceContainer: SurfaceContainer) {
+            isSurfaceAvailable = false
             for (surfaceCallback in listSurfaceCallback) {
                 surfaceCallback.onSurfaceDestroyed(surfaceContainer)
             }
             Log.d("VietMapAndroidAutoSurface", "onSurfaceDestroyed")
-            mapView?.onStop()
-            mapView?.onDestroy()
             synchronized(this@VietMapAndroidAutoSurface) {
                 if (mSurface != null) {
                     mSurface!!.release()
@@ -220,26 +228,30 @@ class VietMapAndroidAutoSurface(private val mCarContext: CarContext, lifecycle: 
     }
 
     override fun onStart(owner: LifecycleOwner) {
+        Log.d("VietMapAndroidAutoSurface", "onLifecycleStart")
         mapView?.onStart()
     }
 
     override fun onResume(owner: LifecycleOwner) {
+        Log.d("VietMapAndroidAutoSurface", "onLifecycleResume")
         mapView?.onResume()
     }
 
     override fun onPause(owner: LifecycleOwner) {
+        Log.d("VietMapAndroidAutoSurface", "onLifecyclePause")
         mapView?.onPause()
     }
 
     override fun onStop(owner: LifecycleOwner) {
+        Log.d("VietMapAndroidAutoSurface", "onLifecycleStop")
         mapView?.onStop()
     }
 
-    @SuppressLint("SuspiciousIndentation")
-    override fun onCreate(owner: LifecycleOwner) {
-        Vietmap.getInstance(mCarContext)
+    private fun initVietMapSDK() {
+        Log.d("VietMapAndroidAutoSurface", "initVietMapSDK")
         Handler(Looper.getMainLooper()).post {
             Vietmap.getInstance(mCarContext)
+
             mapView = createMapViewInstance().apply {
                 // Add the mapView to a window using the windowManager. This is needed for the mapView to start rendering.
                 // The mapView is not actually shown on any screen, but acts as though it is visible.
@@ -263,6 +275,14 @@ class VietMapAndroidAutoSurface(private val mCarContext: CarContext, lifecycle: 
         }
 
         mCarContext.getCarService(AppManager::class.java).setSurfaceCallback(mSurfaceCallback)
+    }
+
+    @SuppressLint("SuspiciousIndentation")
+    override fun onCreate(owner: LifecycleOwner) {
+
+        Log.d("VietMapAndroidAutoSurface", "onLifecycleCreate")
+        Vietmap.getInstance(mCarContext)
+        initVietMapSDK()
     }
 
     private fun getWindowManagerLayoutParams() = WindowManager.LayoutParams(
@@ -289,6 +309,9 @@ class VietMapAndroidAutoSurface(private val mCarContext: CarContext, lifecycle: 
     ) {
         /// Run on main thread
         Handler(Looper.getMainLooper()).post {
+            this.styleBuilder = styleBuilder
+            this.onStyleLoadedCallback = onStyleLoadedCallback
+            this.onMapReadyCallback = onMapReadyCallback
             mapView?.getMapAsync {
                 onMapReadyCallback.onMapReady(vietMapGL!!)
                 vietMapGL = it
@@ -303,7 +326,31 @@ class VietMapAndroidAutoSurface(private val mCarContext: CarContext, lifecycle: 
         }
     }
 
+    private fun init(
+        onStyleLoadedCallback: Style.OnStyleLoaded?,
+        styleBuilder: Style.Builder?,
+        onMapReadyCallback: OnMapReadyCallback?,
+    ) {
+        /// Run on main thread
+        Handler(Looper.getMainLooper()).post {
+            mapView?.getMapAsync {
+                onMapReadyCallback?.onMapReady(vietMapGL!!)
+                vietMapGL = it
+                vietMapGL?.setStyle(
+                    styleBuilder
+                ) { style: Style? ->
+                    if (style != null) {
+                        onStyleLoadedCallback?.onStyleLoaded(style)
+                    }
+                }
+            }
+        }
+    }
+
     fun init(styleBuilder: Style.Builder, onMapReadyCallback: OnMapReadyCallback) {
+
+        this.styleBuilder = styleBuilder
+        this.onMapReadyCallback = onMapReadyCallback
         /// Run on main thread
         Handler(Looper.getMainLooper()).post {
             mapView?.getMapAsync {
@@ -318,6 +365,9 @@ class VietMapAndroidAutoSurface(private val mCarContext: CarContext, lifecycle: 
     }
 
     fun init(styleBuilder: Style.Builder, onStyleLoadedCallback: Style.OnStyleLoaded) {
+
+        this.styleBuilder = styleBuilder
+        this.onStyleLoadedCallback = onStyleLoadedCallback
         /// Run on main thread
         Handler(Looper.getMainLooper()).post {
             mapView?.getMapAsync {
@@ -334,6 +384,8 @@ class VietMapAndroidAutoSurface(private val mCarContext: CarContext, lifecycle: 
     }
 
     fun init(styleBuilder: Style.Builder) {
+
+        this.styleBuilder = styleBuilder
         /// Run on main thread
         Handler(Looper.getMainLooper()).post {
             mapView?.getMapAsync {
@@ -352,11 +404,12 @@ class VietMapAndroidAutoSurface(private val mCarContext: CarContext, lifecycle: 
 
     @MainThread
     private fun doRenderFrame() {
+        if (!isSurfaceAvailable) {
+            return
+        }
         try {
             renderLayout()
-        } catch (e: Exception) {
-            e.printStackTrace()
-//            exitProcess(1)
+        } catch (e: Exception) { 
         }
     }
 
