@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:geolocator/geolocator.dart';
@@ -8,7 +9,9 @@ import 'package:talker/talker.dart';
 import 'package:vietmap_flutter_gl/vietmap_flutter_gl.dart';
 import 'package:vietmap_map/extension/tilemap_extension.dart';
 import 'package:vietmap_map/features/map_screen/components/category_marker.dart';
+import 'package:vietmap_map/method_channel/vietmap_automotive_plugin.dart';
 import '../../constants/colors.dart';
+import '../../constants/events.dart';
 import '../../constants/route.dart';
 import '../../di/app_context.dart';
 import 'bloc/map_bloc.dart';
@@ -27,6 +30,9 @@ class MapScreen extends StatefulWidget {
 }
 
 class _MapScreenState extends State<MapScreen> {
+  final VietMapAutomotivePlugin _mapAutomotivePlugin =
+      VietMapAutomotivePlugin.instance;
+  final MethodChannel _channel = AppContext.getMapChannel();
   VietmapController? _controller;
   List<Marker> _markers = [];
   List<Marker> _nearbyMarker = [];
@@ -57,6 +63,20 @@ class _MapScreenState extends State<MapScreen> {
         ..maskColor = Colors.grey.withOpacity(0.2)
         ..userInteractions = true
         ..dismissOnTap = false;
+      _channel.setMethodCallHandler(
+        (call) async {
+          switch (call.method) {
+            case Events.navigateToSearch:
+              _navigateToSearch();
+              break;
+            case Events.stopNavigation:
+              _panelController.hide();
+              _clearMarker();
+              break;
+            default:
+          }
+        },
+      );
       Future.delayed(const Duration(milliseconds: 200)).then((value) {
         _panelController.hide();
       });
@@ -159,10 +179,8 @@ class _MapScreenState extends State<MapScreen> {
         onWillPop: () async {
           if (_panelController.isPanelShown || _panelController.isPanelOpen) {
             _panelController.hide();
-            setState(() {
-              _markers = [];
-              _nearbyMarker = [];
-            });
+            _removeRoutes();
+            _clearMarker();
             return false;
           }
           return true;
@@ -190,10 +208,8 @@ class _MapScreenState extends State<MapScreen> {
                   },
                   onMapClick: (point, coordinates) async {
                     _panelController.hide();
-                    setState(() {
-                      _markers = [];
-                      _nearbyMarker = [];
-                    });
+                    _removeRoutes();
+                    _clearMarker();
                     var response =
                         await _controller?.queryRenderedFeatures(point: point);
                     if (response == null || response.isEmpty) return;
@@ -277,8 +293,9 @@ class _MapScreenState extends State<MapScreen> {
                   key: const Key('searchBarKey'),
                   top: MediaQuery.of(context).viewPadding.top,
                   child: InkWell(
-                    onTap: () {
-                      Navigator.pushNamed(context, Routes.searchScreen);
+                    onTap: () async {
+                      _mapAutomotivePlugin.navigateToSearch();
+                      _navigateToSearch();
                     },
                     child: Hero(
                       tag: 'searchBar',
@@ -395,6 +412,21 @@ class _MapScreenState extends State<MapScreen> {
   _showPanel() {
     Future.delayed(const Duration(milliseconds: 100))
         .then((value) => _panelController.animatePanelToPosition(1.0));
+  }
+
+  _removeRoutes() async {
+    await _mapAutomotivePlugin.removeRoutes();
+  }
+
+  _navigateToSearch() async {
+    await Navigator.pushNamed(context, Routes.searchScreen);
+  }
+
+  _clearMarker() {
+    setState(() {
+      _markers = [];
+      _nearbyMarker = [];
+    });
   }
 
   _showSelectMapTilesModal() {

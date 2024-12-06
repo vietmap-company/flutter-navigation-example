@@ -1,11 +1,13 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:vietmap_map/data/models/vietmap_marker_model.dart';
 // import 'package:geolocator/geolocator.dart';
 
 import 'package:vietmap_map/data/models/vietmap_reverse_model.dart';
 import 'package:vietmap_map/domain/repository/history_search_repositories.dart';
 import 'package:vietmap_map/domain/repository/vietmap_api_repositories.dart';
 import 'package:vietmap_map/domain/usecase/search_address_usecase.dart';
+import 'package:vietmap_map/method_channel/vietmap_automotive_plugin.dart';
 import '../../../core/no_params.dart';
 import '../../../di/app_context.dart';
 import '../../../domain/entities/vietmap_routing_params.dart';
@@ -20,6 +22,8 @@ import 'map_state.dart';
 import 'package:vietmap_gl_platform_interface/vietmap_gl_platform_interface.dart';
 
 class MapBloc extends Bloc<MapEvent, MapState> {
+  final VietMapAutomotivePlugin _vietMapAutomotivePlugin =
+      VietMapAutomotivePlugin.instance;
   MapBloc() : super(const MapStateInitial()) {
     on<MapEventSearchAddress>(_onMapEventSearchAddress);
     on<MapEventGetDetailAddress>(_onMapEventGetDetailAddress);
@@ -45,11 +49,39 @@ class MapBloc extends Bloc<MapEvent, MapState> {
   _onMapEventUserClickOnMapPoint(
       MapEventUserClickOnMapPoint event, Emitter<MapState> emit) async {
     emit(MapStateLoading(state));
+    num? distanceToLocation;
+
+    await Future.wait(
+      [
+        _vietMapAutomotivePlugin
+            .getDistanceToLocation(
+          location:
+              LatLng(event.coordinate.latitude, event.coordinate.longitude),
+        )
+            .then(
+          (result) {
+            distanceToLocation = result;
+          },
+        ),
+        _vietMapAutomotivePlugin.addMarkers(
+          markers: [
+            VietmapMarkerModel(
+              lat: event.coordinate.latitude,
+              lng: event.coordinate.longitude,
+              title: event.placeName,
+              snippet: event.placeShortName,
+            )
+          ],
+        )
+      ],
+    );
     VietmapReverseModel r = VietmapReverseModel(
-        lat: event.coordinate.latitude,
-        lng: event.coordinate.longitude,
-        address: event.placeName,
-        name: event.placeShortName);
+      lat: event.coordinate.latitude,
+      lng: event.coordinate.longitude,
+      address: event.placeName,
+      name: event.placeShortName,
+      distanceFromCurrentLocation: distanceToLocation,
+    );
     emit(MapStateGetLocationFromCoordinateSuccess(r, state));
   }
 
@@ -101,7 +133,20 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     EasyLoading.dismiss();
     response.fold(
         (l) => emit(MapStateGetLocationFromCoordinateError('Error', state)),
-        (r) => emit(MapStateGetLocationFromCoordinateSuccess(r, state)));
+        (r) async {
+      emit(MapStateGetLocationFromCoordinateSuccess(r, state));
+
+      await _vietMapAutomotivePlugin.addMarkers(
+        markers: [
+          VietmapMarkerModel(
+            lat: event.coordinate.latitude,
+            lng: event.coordinate.longitude,
+            title: r.name,
+            snippet: r.address,
+          )
+        ],
+      );
+    });
   }
 
   _onMapEventGetDirection(

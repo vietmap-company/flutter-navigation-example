@@ -1,11 +1,15 @@
 package vn.vietmap.androidauto.screens
 
 import android.annotation.SuppressLint
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.graphics.PointF
 import android.location.Location
 import android.os.Build
 import android.util.Log
+import android.view.LayoutInflater
+import android.widget.FrameLayout
 import androidx.annotation.RequiresApi
 import androidx.car.app.CarContext
 import androidx.car.app.OnScreenResultListener
@@ -13,21 +17,28 @@ import androidx.car.app.Screen
 import androidx.car.app.ScreenManager
 import androidx.car.app.SurfaceCallback
 import androidx.car.app.model.Template
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleObserver
+import androidx.lifecycle.OnLifecycleEvent
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.geojson.Point
 import com.mapbox.turf.TurfMisc
+import io.flutter.embedding.engine.FlutterEngine
+import io.flutter.plugin.common.MethodCall
+import io.flutter.plugin.common.MethodChannel
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import vn.vietmap.androidauto.R
 import vn.vietmap.androidauto.vm_interface.IVietMapCarMapController
 import vn.vietmap.androidauto.car_surface.VietMapAndroidAutoSurface
 import vn.vietmap.androidauto.helper.VietMapCarSurfaceHelper
 import vn.vietmap.androidauto.helper.VietMapNavigationHelper
 import vn.vietmap.androidauto.model.CurrentCenterPoint
 import vn.vietmap.androidauto.model.PlaceDetail
-import vn.vietmap.androidauto.model.PlaceItem
+import vn.vietmap.androidauto.service.IAndroidAutoNavigationCommunicator
 import vn.vietmap.services.android.navigation.ui.v5.camera.CameraOverviewCancelableCallback
 import vn.vietmap.services.android.navigation.ui.v5.listeners.BannerInstructionsListener
 import vn.vietmap.services.android.navigation.ui.v5.listeners.NavigationListener
@@ -54,6 +65,10 @@ import vn.vietmap.services.android.navigation.v5.route.FasterRouteListener
 import vn.vietmap.services.android.navigation.v5.routeprogress.ProgressChangeListener
 import vn.vietmap.services.android.navigation.v5.routeprogress.RouteProgress
 import vn.vietmap.services.android.navigation.v5.snap.SnapToRoute
+import vn.vietmap.vietmapsdk.annotations.Icon
+import vn.vietmap.vietmapsdk.annotations.IconFactory
+import vn.vietmap.vietmapsdk.annotations.Marker
+import vn.vietmap.vietmapsdk.annotations.MarkerOptions
 import vn.vietmap.vietmapsdk.camera.CameraPosition
 import vn.vietmap.vietmapsdk.camera.CameraUpdate
 import vn.vietmap.vietmapsdk.camera.CameraUpdateFactory
@@ -82,14 +97,16 @@ class VietMapNavigationScreen(
 ) : Screen(carContext), ProgressChangeListener,
     OffRouteListener, MilestoneEventListener, NavigationEventListener, NavigationListener,
     FasterRouteListener, SpeechAnnouncementListener, BannerInstructionsListener, RouteListener,
-    IVietMapCarMapController {
-
+    IVietMapCarMapController, IAndroidAutoNavigationCommunicator, LifecycleObserver{
 
     private var routeClicked: Boolean = false
     private var currentRoute: DirectionsRoute? = null
     private var locationEngine: LocationEngine? = null
     private var navigationMapRoute: NavigationMapRoute? = null
     private var directionsRoutes: List<DirectionsRoute>? = null
+    private var markers: List<Marker>? = null
+    private var mapMethodChannel: MethodChannel? = null
+    private var flutterEngine: FlutterEngine? = null
 
     private var distanceToOffRoute = 30 //distance in meter
     private val navigationOptions =
@@ -134,7 +151,12 @@ class VietMapNavigationScreen(
         var isRunning: Boolean = false
 
         var padding: IntArray = intArrayOf(300, 200, 30, 30)
+        const val VIETMAP_ANDROID_AUTO_CHANNEL = "vn.vietmap.automotive/maps"
+    }
 
+    fun initFlutterEngine(flutterEngine: FlutterEngine){
+        this.flutterEngine = flutterEngine
+        mapMethodChannel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, VIETMAP_ANDROID_AUTO_CHANNEL)
     }
 
     private fun playVoiceAnnouncement(milestone: Milestone?) {
@@ -151,6 +173,7 @@ class VietMapNavigationScreen(
     }
 
     private var vietmapGL: VietMapGL? = null
+    private var vietmapInfoWindowAdapter: VietMapGL.InfoWindowAdapter? = null
 
 
     private fun clearRoute() {
@@ -162,6 +185,7 @@ class VietMapNavigationScreen(
     }
 
     override fun stopNavigation() {
+        mapMethodChannel?.invokeMethod("stopNavigation", null)
         vietMapCarSurfaceHelper.refreshNavigationTemplate()
         invalidate()
         navigation?.stopNavigation()
@@ -180,10 +204,15 @@ class VietMapNavigationScreen(
     }
 
     override fun pushToSearchScreen() {
+        mapMethodChannel?.invokeMethod("navigateToSearch", null)
+        goToSearchScreen()
+    }
+
+    private fun goToSearchScreen() {
         val screenManager: ScreenManager =
             carContext.getCarService(ScreenManager::class.java)
         screenManager.pushForResult(VietMapSearchScreen(carContext), OnScreenResultListener {
-            result ->
+                result ->
             if(result != null && result is PlaceDetail){
                 Log.d("VietMapNavigationScreen", "PlaceDetail: $result")
                 destinationPoint = Point.fromLngLat(result.lng, result.lat)
@@ -287,7 +316,9 @@ class VietMapNavigationScreen(
         override fun onClick(x: Float, y: Float) {
             super.onClick(x, y)
             val clickedLatLng = vietmapGL?.projection?.fromScreenLocation(PointF(x, y))
-            clickedLatLng?.let { navigationMapRoute?.onMapClick(it) }
+            clickedLatLng?.let {
+                navigationMapRoute?.onMapClick(it)
+            }
         }
 
         override fun onScroll(distanceX: Float, distanceY: Float) {
@@ -302,6 +333,7 @@ class VietMapNavigationScreen(
     }
 
     init {
+        lifecycle.addObserver(this)
         locationEngine = if (simulateRoute) {
             ReplayRouteLocationEngine()
         } else {
@@ -330,6 +362,13 @@ class VietMapNavigationScreen(
                 initMapRoute()
             }, {
                 vietmapGL = it
+                vietmapInfoWindowAdapter = VietMapGL.InfoWindowAdapter {
+                    val layoutInflater = LayoutInflater.from(carContext)
+                    val tempLayout = mSurfaceRenderer.getMapView()
+                    val view = layoutInflater.inflate(vn.vietmap.services.android.navigation.ui.v5.R.layout.vietmap_infowindow_content, tempLayout, false)
+                    view
+                }
+                vietmapGL?.infoWindowAdapter = vietmapInfoWindowAdapter
             }
 
         )
@@ -494,7 +533,10 @@ class VietMapNavigationScreen(
 
                 //show multiple route to map
                 if (response.body()!!.routes().size > 1) {
-                    navigationMapRoute?.addRoutes(directionsRoutes!!)
+                    navigationMapRoute?.let{
+                        it.addRoutes(directionsRoutes!!)
+                        it.showAlternativeRoutes(true)
+                    }
                 } else {
                     navigationMapRoute?.addRoute(currentRoute)
                 }
@@ -818,5 +860,121 @@ class VietMapNavigationScreen(
                 isNextTurnHandling = false
             }
         }
+    }
+
+    private fun removeMarkers() {
+        markers?.forEach {
+            vietmapGL?.removeMarker(it)
+        }
+    }
+
+
+    @SuppressLint("MissingPermission")
+    override fun getDistanceToLocation(
+        methodCall: MethodCall,
+        result: MethodChannel.Result
+    ) {
+        val args = methodCall.arguments as Map<*, *>
+        val lat = args["latitude"] as Double?
+        val lng = args["longitude"] as Double?
+        val destination = Location("destination").apply {
+            latitude = lat ?: 0.0
+            longitude = lng ?: 0.0
+        }
+        if(originPoint?.latitude() == null || originPoint?.longitude() == null){
+            locationEngine?.getLastLocation(
+                object : LocationEngineCallback<LocationEngineResult> {
+                    override fun onSuccess(locationResult: LocationEngineResult) {
+                        val location = locationResult.lastLocation
+                        originPoint = Point.fromLngLat(location?.longitude ?: 0.0  , location?.latitude ?: 0.0)
+                        val distanceInMeters = VietMapNavigationHelper.calculateDistanceBetween2Point(
+                            Location("origin").apply {
+                                latitude = originPoint?.latitude() ?: 0.0
+                                longitude = originPoint?.longitude() ?: 0.0
+                            },
+                            destination
+                        )
+                        result.success(distanceInMeters/1000)
+                    }
+
+                    override fun onFailure(exception: Exception) {
+                        result.success(0.0)
+                    }
+                }
+            )
+            return
+        }
+        val distanceInMeters = VietMapNavigationHelper.calculateDistanceBetween2Point(
+            Location("origin").apply {
+                latitude = originPoint?.latitude() ?: 0.0
+                longitude = originPoint?.longitude() ?: 0.0
+            },
+            destination
+        )
+        result.success(distanceInMeters/1000)
+    }
+
+    override fun navigateToSearch(result: MethodChannel.Result) {
+        goToSearchScreen()
+        result.success(true)
+    }
+
+    override fun removeRoutes(result: MethodChannel.Result) {
+        clearRoute()
+        removeMarkers()
+        vietMapCarSurfaceHelper.refreshNavigationTemplate()
+        result.success(true)
+    }
+
+    @SuppressLint("MissingPermission")
+    override fun addMarkers(call: MethodCall, result: MethodChannel.Result) {
+        removeMarkers()
+        val data = call.arguments as List<Map<*,*>>
+        val listMarkerId = ArrayList<Long>()
+        try {
+            val coordinatesList = ArrayList<Point>()
+            data.forEach {
+                val markerData = it
+                val position = LatLng(markerData["latitude"] as Double, markerData["longitude"] as Double)
+                val icon = IconFactory.getInstance(carContext).fromResource(vn.vietmap.services.android.navigation.ui.v5.R.drawable.vietmap_marker_icon_default)
+                coordinatesList.add(Point.fromLngLat(position.longitude, position.latitude))
+                val markerOption = MarkerOptions().icon(icon).title((markerData["title"] ?: "") as String)
+                    .snippet((markerData["snippet"] ?: "") as String).position(position)
+
+                val marker: Marker = vietmapGL!!.addMarker(markerOption)
+                marker.showInfoWindow(vietmapGL!!, mSurfaceRenderer.getMapView()!!)
+
+                listMarkerId.add(marker.id)
+            }
+            vietmapGL?.locationComponent?.locationEngine?.getLastLocation(
+                object : LocationEngineCallback<LocationEngineResult> {
+                    override fun onSuccess(locationResult: LocationEngineResult) {
+                        val location = locationResult.lastLocation
+                        if (location != null) {
+                            markers = vietmapGL!!.markers.toList()
+                            coordinatesList.add(0, Point.fromLngLat(location.longitude, location.latitude))
+                            animateVietmapGLForRouteOverview(padding, coordinatesList)
+                            result.success(listMarkerId)
+                        }
+                    }
+
+                    override fun onFailure(exception: Exception) {
+                        result.success(listMarkerId)
+                    }
+                }
+            )
+        }catch(e: Exception){
+            e.printStackTrace()
+            result.success(listMarkerId)
+        }
+    }
+
+    private fun inputMarkers() {
+
+    }
+
+    @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+    fun onDestroy() {
+        mapMethodChannel = null
     }
 }

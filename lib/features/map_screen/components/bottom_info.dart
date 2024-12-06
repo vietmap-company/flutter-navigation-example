@@ -143,6 +143,10 @@ class BottomSheetInfo extends StatelessWidget {
                 const SizedBox(height: 10),
                 Text(state.response.address ?? '',
                     style: const TextStyle(fontSize: 16)),
+                const SizedBox(height: 10),
+                Text(
+                    'Khoảng cách: ${state.response.distanceFromCurrentLocation?.toStringAsFixed(2) ?? 0} km',
+                    style: const TextStyle(fontSize: 16)),
                 const Spacer(),
                 Row(
                   children: [
