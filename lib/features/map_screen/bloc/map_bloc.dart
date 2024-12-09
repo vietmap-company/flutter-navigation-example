@@ -63,16 +63,17 @@ class MapBloc extends Bloc<MapEvent, MapState> {
             distanceToLocation = result;
           },
         ),
-        _vietMapAutomotivePlugin.addMarkers(
-          markers: [
-            VietmapMarkerModel(
-              lat: event.coordinate.latitude,
-              lng: event.coordinate.longitude,
-              title: event.placeName,
-              snippet: event.placeShortName,
-            )
-          ],
-        )
+        if (event.isSendingEvent)
+          _vietMapAutomotivePlugin.addMarkers(
+            markers: [
+              VietmapMarkerModel(
+                lat: event.coordinate.latitude,
+                lng: event.coordinate.longitude,
+                title: event.placeName,
+                snippet: event.placeShortName,
+              )
+            ],
+          )
       ],
     );
     VietmapReverseModel r = VietmapReverseModel(

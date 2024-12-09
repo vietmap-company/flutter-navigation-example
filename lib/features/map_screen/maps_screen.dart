@@ -73,6 +73,25 @@ class _MapScreenState extends State<MapScreen> {
               _panelController.hide();
               _clearMarker();
               break;
+            case Events.onFeatureClicked:
+              _panelController.hide();
+              _clearMarker();
+              final args = Map<String, dynamic>.from(call.arguments);
+              final snippet = args['snippet'] as String?;
+              final title = args['title'] as String?;
+              final lat = args['latitude'];
+              final lng = args['longitude'];
+
+              context.read<MapBloc>().add(
+                    MapEventUserClickOnMapPoint(
+                      placeShortName: snippet ?? '',
+                      placeName: title ?? '',
+                      coordinate: LatLng(lat ?? 0, lng ?? 0),
+                      isSendingEvent: false,
+                    ),
+                  );
+
+              break;
             default:
           }
         },

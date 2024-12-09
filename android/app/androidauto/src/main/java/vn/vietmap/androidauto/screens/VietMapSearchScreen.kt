@@ -6,6 +6,8 @@ import androidx.car.app.CarContext
 import androidx.car.app.Screen
 import androidx.car.app.ScreenManager
 import androidx.car.app.model.Action
+import androidx.car.app.model.ActionStrip
+import androidx.car.app.model.CarIcon
 import androidx.car.app.model.ItemList
 import androidx.car.app.model.Row
 import androidx.car.app.model.SearchTemplate
@@ -15,6 +17,7 @@ import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
 import androidx.lifecycle.lifecycleScope
 import io.flutter.embedding.engine.FlutterEngine
+import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -36,6 +39,7 @@ class VietMapSearchScreen(carContext: CarContext): Screen(carContext), Lifecycle
     private var placeItems : List<PlaceItem> = emptyList()
     private var searchMethodChannel: MethodChannel? = null
     private var flutterEngine: FlutterEngine? = null
+    private var searchText: String = ""
 
     companion object {
         const val VIETMAP_ANDROID_AUTO_CHANNEL = "vn.vietmap.automotive/search"
@@ -63,38 +67,26 @@ class VietMapSearchScreen(carContext: CarContext): Screen(carContext), Lifecycle
         @SuppressLint("MissingPermission")
         override fun onSearchTextChanged(query: String) {
             // Handle search text change event here
-            locationEngine?.getLastLocation(
-                object : LocationEngineCallback<LocationEngineResult> {
-                    override fun onSuccess(result: LocationEngineResult?) {
-                        val lat = result?.lastLocation?.latitude
-                        val lng = result?.lastLocation?.longitude
-                        performSearch(query, "$lat,$lng")
-                    }
-
-                    override fun onFailure(exception: Exception) {
-                        performSearch(query, null)
-                    }
-                }
-            )
+            searchMethodChannel?.invokeMethod("queryTextUpdated", mapOf("query" to query))
+            searchCallBackFun(query)
         }
 
-        private fun performSearch(query: String, latLngString: String?){
-            lifecycleScope.launch {
-                delay(500)
-                val resp = searchScreenService.autocomplete(query, latLngString)
-                setResults(if (resp.isSuccessful) resp.body() ?: emptyList() else emptyList())
-            }
-        }
 
         override fun onSearchSubmitted(query: String) {
             // Handle search submit event here
             Log.d("VietMapSearchScreen", "onSearchSubmitted: $query")
         }
     }
+    private fun performSearch(query: String, latLngString: String?){
+        lifecycleScope.launch {
+            delay(500)
+            val resp = searchScreenService.autocomplete(query, latLngString)
+            setResults(if (resp.isSuccessful) resp.body() ?: emptyList() else emptyList())
+        }
+    }
 
 
-
-    private fun setResults(results: List<PlaceItem>) {
+    private fun setResults(results: List<PlaceItem>){
         placeItems = results.toList()
         val itemList = ItemList.Builder()
         results.forEach{
@@ -112,6 +104,10 @@ class VietMapSearchScreen(carContext: CarContext): Screen(carContext), Lifecycle
         invalidate()
     }
 
+    private fun onBackPressed() {
+        searchMethodChannel?.invokeMethod("closeSearch", null)
+        finish()
+    }
 
     private fun onPlaceSelected(placeItem: PlaceItem){
         // Pop back to navigation place and set destination
@@ -123,14 +119,19 @@ class VietMapSearchScreen(carContext: CarContext): Screen(carContext), Lifecycle
             }
         }
     }
+    private var backAction = Action.Builder()
+        .setIcon(CarIcon.BACK)
+        .setOnClickListener { onBackPressed() }
+        .build()
 
     private var searchTemplate = SearchTemplate.Builder(searchCallback)
-        .setHeaderAction(Action.BACK)
+        .setActionStrip(ActionStrip.Builder().addAction(backAction).build())
         .setSearchHint("Tìm Kiếm")
+
 
     private fun refreshSearchTemplate() {
         searchTemplate = SearchTemplate.Builder(searchCallback)
-            .setHeaderAction(Action.BACK)
+            .setActionStrip(ActionStrip.Builder().addAction(backAction).build())
             .setSearchHint("Tìm Kiếm")
     }
 
@@ -141,16 +142,51 @@ class VietMapSearchScreen(carContext: CarContext): Screen(carContext), Lifecycle
     @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
     fun onDestroy(){
         setSearchScreenInstance(null)
-        searchMethodChannel?.invokeMethod(
-            "closeSearch",
-            null
-        )
         searchMethodChannel = null
     }
 
     override fun closeSearch(result: MethodChannel.Result) {
-        Log.d("VietMapSearchScreen", "closeSearch")
         finish()
+        result.success(true)
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun searchCallBackFun(query: String){
+        searchText = query
+        if(query.isEmpty() || query.length < 2) return
+        locationEngine?.getLastLocation(
+            object : LocationEngineCallback<LocationEngineResult> {
+                override fun onSuccess(result: LocationEngineResult?) {
+                    val lat = result?.lastLocation?.latitude
+                    val lng = result?.lastLocation?.longitude
+                    performSearch(searchText, "$lat,$lng")
+                }
+
+                override fun onFailure(exception: Exception) {
+                    performSearch(searchText, null)
+                }
+            }
+        )
+    }
+
+    override fun onTextReceived(call: MethodCall, result: MethodChannel.Result) {
+        val args = call.arguments as Map<*, *>
+        val query = args["query"] as String?
+        searchCallBackFun(query ?: "")
+
+        if(query != null && query.length < 2) {
+            searchTemplate.setItemList(
+                ItemList.Builder()
+                    .addItem(
+                        Row.Builder()
+                            .setTitle("Nhập ít nhất 2 ký tự để tìm kiếm")
+                            .build()
+                    )
+                    .build()
+            ).setInitialSearchText(query)
+            invalidate()
+        }
+
         result.success(true)
     }
 }

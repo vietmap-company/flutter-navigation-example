@@ -7,4 +7,6 @@ class Events {
   static const String navigateToSearch = 'navigateToSearch';
   static const String stopNavigation = 'stopNavigation';
   static const String addMarkers = 'addMarkers';
+  static const String queryTextUpdated = 'queryTextUpdated';
+  static const String onFeatureClicked = 'onFeatureClicked';
 }

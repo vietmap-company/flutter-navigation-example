@@ -40,6 +40,17 @@ class _SearchScreenState extends State<SearchScreen> {
               _focusNode.unfocus();
               Navigator.pop(context);
               break;
+            case Events.queryTextUpdated:
+              final query = call.arguments['query'] as String?;
+              if (query != null && query.isNotEmpty && query.length >= 2) {
+                _searchController.text = query;
+                _debounce.run(() {
+                  context
+                      .read<MapBloc>()
+                      .add(MapEventSearchAddress(address: query));
+                });
+              }
+              break;
             default:
           }
         },
@@ -78,7 +89,9 @@ class _SearchScreenState extends State<SearchScreen> {
                     child: TextField(
                       controller: _searchController,
                       onChanged: (value) {
-                        if (value.isNotEmpty) {
+                        if (value.isNotEmpty && value.length >= 2) {
+                          _vietMapAutomotivePlugin.queryTextUpdated(
+                              query: value);
                           _debounce.run(() {
                             context
                                 .read<MapBloc>()
@@ -99,6 +112,7 @@ class _SearchScreenState extends State<SearchScreen> {
                               borderSide: const BorderSide(color: Colors.grey)),
                           prefixIcon: InkWell(
                             onTap: () {
+                              _vietMapAutomotivePlugin.closeSearch();
                               Navigator.pop(context);
                             },
                             child: const Icon(

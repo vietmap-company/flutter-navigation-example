@@ -41,4 +41,12 @@ class VietMapAutomotivePlugin {
       markers: markers,
     );
   }
+
+  Future<bool?> queryTextUpdated({
+    required String query,
+  }) async {
+    return await VietmapAutomotivePlatformInterface.instance.queryTextUpdated(
+      query: query,
+    );
+  }
 }

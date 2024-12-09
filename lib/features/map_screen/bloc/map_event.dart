@@ -58,11 +58,14 @@ class MapEventUserClickOnMapPoint extends MapEvent {
   final String placeName;
   final LatLng coordinate;
   final String placeShortName;
+  final bool isSendingEvent;
 
-  MapEventUserClickOnMapPoint(
-      {required this.placeName,
-      required this.placeShortName,
-      required this.coordinate});
+  MapEventUserClickOnMapPoint({
+    required this.placeName,
+    required this.placeShortName,
+    required this.coordinate,
+    this.isSendingEvent = true,
+  });
 }
 
 class MapEventChangeMapTiles extends MapEvent {

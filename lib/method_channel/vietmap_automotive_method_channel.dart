@@ -11,6 +11,10 @@ class MethodChannelVietmapAutomotivePlugin
   @visibleForTesting
   final methodChannel = const MethodChannel('vn.vietmap.automotive');
 
+  @visibleForTesting
+  final searchMethodChannel =
+      const MethodChannel('vn.vietmap.automotive/search');
+
   @override
   Future<num?> getDistanceToLocation({
     required LatLng location,
@@ -66,5 +70,16 @@ class MethodChannelVietmapAutomotivePlugin
       Events.addMarkers,
       markersMap,
     );
+  }
+
+  @override
+  Future<bool?> queryTextUpdated({required String query}) async {
+    final result = await methodChannel.invokeMethod<bool?>(
+      Events.queryTextUpdated,
+      {
+        'query': query,
+      },
+    );
+    return result;
   }
 }

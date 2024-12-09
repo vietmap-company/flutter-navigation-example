@@ -47,4 +47,10 @@ abstract class VietmapAutomotivePlatformInterface extends PlatformInterface {
   }) {
     throw UnimplementedError('addMarkers() has not been implemented.');
   }
+
+  Future<bool?> queryTextUpdated({
+    required String query,
+  }) {
+    throw UnimplementedError('removeMarkers() has not been implemented.');
+  }
 }
