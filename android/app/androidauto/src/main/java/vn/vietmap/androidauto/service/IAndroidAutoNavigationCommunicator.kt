@@ -8,4 +8,6 @@ interface IAndroidAutoNavigationCommunicator {
     fun navigateToSearch(result: Result)
     fun removeRoutes(result: Result)
     fun addMarkers(call: MethodCall, result: Result)
+    fun onStartNavigation(call: MethodCall, result: Result)
+    fun onCreateRoute(result: Result)
 }

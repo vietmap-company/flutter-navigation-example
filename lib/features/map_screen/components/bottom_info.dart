@@ -10,8 +10,14 @@ import '../../routing_screen/models/routing_params_model.dart';
 import '../bloc/map_state.dart';
 
 class BottomSheetInfo extends StatelessWidget {
-  const BottomSheetInfo({super.key, required this.onClose});
+  const BottomSheetInfo(
+      {super.key,
+      required this.onClose,
+      required this.onCreateRouteCallback,
+      required this.onStartNavigationCallback});
   final VoidCallback onClose;
+  final VoidCallback onCreateRouteCallback;
+  final VoidCallback onStartNavigationCallback;
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<MapBloc, MapState>(
@@ -67,6 +73,7 @@ class BottomSheetInfo extends StatelessWidget {
                   children: [
                     MapActionButton(
                         onPressed: () async {
+                          onCreateRouteCallback();
                           EasyLoading.show();
                           Navigator.pushNamed(context, Routes.routingScreen,
                               arguments: RoutingParamsModel.fromVietmapModel(
@@ -82,6 +89,7 @@ class BottomSheetInfo extends StatelessWidget {
                     const SizedBox(width: 10),
                     MapActionButtonOutline(
                         onPressed: () {
+                          onStartNavigationCallback();
                           Navigator.pushNamed(context, Routes.routingScreen,
                               arguments: RoutingParamsModel.fromVietmapModel(
                                   state.response, true));
@@ -152,6 +160,7 @@ class BottomSheetInfo extends StatelessWidget {
                   children: [
                     MapActionButton(
                         onPressed: () async {
+                          onCreateRouteCallback();
                           EasyLoading.show();
                           Navigator.pushNamed(context, Routes.routingScreen,
                               arguments: RoutingParamsModel.fromVietmapModel(
@@ -167,6 +176,7 @@ class BottomSheetInfo extends StatelessWidget {
                     const SizedBox(width: 10),
                     MapActionButtonOutline(
                         onPressed: () {
+                          onStartNavigationCallback();
                           Navigator.pushNamed(context, Routes.routingScreen,
                               arguments: RoutingParamsModel.fromVietmapModel(
                                   state.response, true));

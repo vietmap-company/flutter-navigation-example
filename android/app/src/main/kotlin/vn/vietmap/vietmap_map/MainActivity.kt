@@ -77,6 +77,15 @@ class MainActivity: FlutterActivity(), LifecycleObserver {
                 "queryTextUpdated" -> {
                     androidAutoSearchCommunicator?.onTextReceived(call, result)
                 }
+                "selectSearchResult" -> {
+                    androidAutoSearchCommunicator?.onSearchResultSelected(call, result)
+                }
+                "startNavigation" -> {
+                    androidAutoCommunicator?.onStartNavigation(call, result)
+                }
+                "createRoute" -> {
+                    androidAutoCommunicator?.onCreateRoute(result)
+                }
                 else -> result.notImplemented()
             }
         }
@@ -85,6 +94,7 @@ class MainActivity: FlutterActivity(), LifecycleObserver {
     @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
     private fun doDestroy() {
         methodChannel.setMethodCallHandler(null)
-
+        androidAutoCommunicator = null
+        androidAutoSearchCommunicator = null
     }
 }

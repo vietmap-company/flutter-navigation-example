@@ -111,6 +111,7 @@ class VietMapSearchScreen(carContext: CarContext): Screen(carContext), Lifecycle
 
     private fun onPlaceSelected(placeItem: PlaceItem){
         // Pop back to navigation place and set destination
+        searchMethodChannel?.invokeMethod("selectSearchResult", mapOf("refId" to placeItem.ref_id))
         lifecycleScope.launch {
             val resp = searchScreenService.getPlaceDetail(placeItem.ref_id)
             if(resp.isSuccessful){
@@ -187,6 +188,19 @@ class VietMapSearchScreen(carContext: CarContext): Screen(carContext), Lifecycle
             invalidate()
         }
 
+        result.success(true)
+    }
+
+    override fun onSearchResultSelected(call: MethodCall, result: MethodChannel.Result) {
+        val args = call.arguments as Map<*, *>
+        val refId = args["refId"] as String
+        lifecycleScope.launch {
+            val resp = searchScreenService.getPlaceDetail(refId)
+            if(resp.isSuccessful){
+                setResult(resp.body())
+                finish()
+            }
+        }
         result.success(true)
     }
 }

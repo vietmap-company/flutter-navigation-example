@@ -15,6 +15,10 @@ class MethodChannelVietmapAutomotivePlugin
   final searchMethodChannel =
       const MethodChannel('vn.vietmap.automotive/search');
 
+  @visibleForTesting
+  final navigationChannel =
+      const MethodChannel('vn.vietmap.automotive/navigation');
+
   @override
   Future<num?> getDistanceToLocation({
     required LatLng location,
@@ -80,6 +84,29 @@ class MethodChannelVietmapAutomotivePlugin
         'query': query,
       },
     );
+    return result;
+  }
+
+  @override
+  Future<bool?> selectSearchResult({required String refId}) async {
+    final result =
+        await methodChannel.invokeMethod<bool?>(Events.selectSearchResult, {
+      'refId': refId,
+    });
+    return result;
+  }
+
+  @override
+  Future<bool?> startNavigation() async {
+    final result =
+        await methodChannel.invokeMethod<bool?>(Events.onStartNavigation);
+    return result;
+  }
+
+  @override
+  Future<bool?> createRoute() async {
+    final result =
+        await methodChannel.invokeMethod<bool?>(Events.onCreateRoute);
     return result;
   }
 }

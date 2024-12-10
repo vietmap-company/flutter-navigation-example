@@ -51,6 +51,16 @@ class _SearchScreenState extends State<SearchScreen> {
                 });
               }
               break;
+            case Events.selectSearchResult:
+              final refId = call.arguments['refId'] as String?;
+              if (refId != null) {
+                context
+                    .read<MapBloc>()
+                    .add(MapEventGetDetailAddressById(refId));
+                _focusNode.unfocus();
+                Navigator.pop(context);
+              }
+              break;
             default:
           }
         },

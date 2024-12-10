@@ -14,6 +14,7 @@ import '../../constants/colors.dart';
 import '../../constants/events.dart';
 import '../../constants/route.dart';
 import '../../di/app_context.dart';
+import '../routing_screen/models/routing_params_model.dart';
 import 'bloc/map_bloc.dart';
 import 'bloc/map_event.dart';
 import 'bloc/map_state.dart';
@@ -91,6 +92,36 @@ class _MapScreenState extends State<MapScreen> {
                     ),
                   );
 
+              break;
+            case Events.onStartNavigation:
+              final args = Map<String, dynamic>.from(call.arguments);
+
+              Navigator.pushNamed(
+                context,
+                Routes.routingScreen,
+                arguments: RoutingParamsModel.fromChannelReceived(
+                  lat: args['latitude'],
+                  lng: args['longitude'],
+                  name: args['title'],
+                  snippet: args['snippet'],
+                  isStartNavigation: true,
+                ),
+              );
+              break;
+            case Events.onCreateRoute:
+              final args = Map<String, dynamic>.from(call.arguments);
+
+              Navigator.pushNamed(
+                context,
+                Routes.routingScreen,
+                arguments: RoutingParamsModel.fromChannelReceived(
+                  lat: args['latitude'],
+                  lng: args['longitude'],
+                  name: args['title'],
+                  snippet: args['snippet'],
+                  isStartNavigation: false,
+                ),
+              );
               break;
             default:
           }
@@ -358,23 +389,30 @@ class _MapScreenState extends State<MapScreen> {
                       },
                     )),
                 SlidingUpPanel(
-                    isDraggable: true,
-                    controller: _panelController,
-                    maxHeight: 200,
-                    minHeight: 0,
-                    parallaxEnabled: true,
-                    parallaxOffset: .1,
-                    backdropEnabled: false,
-                    onPanelSlide: (position) {
-                      setState(() {
-                        panelPosition = position;
-                      });
+                  isDraggable: true,
+                  controller: _panelController,
+                  maxHeight: 200,
+                  minHeight: 0,
+                  parallaxEnabled: true,
+                  parallaxOffset: .1,
+                  backdropEnabled: false,
+                  onPanelSlide: (position) {
+                    setState(() {
+                      panelPosition = position;
+                    });
+                  },
+                  panelBuilder: () => BottomSheetInfo(
+                    onClose: () {
+                      _panelController.hide();
                     },
-                    panelBuilder: () => BottomSheetInfo(
-                          onClose: () {
-                            _panelController.hide();
-                          },
-                        )),
+                    onCreateRouteCallback: () {
+                      _mapAutomotivePlugin.createRoute();
+                    },
+                    onStartNavigationCallback: () {
+                      _mapAutomotivePlugin.startNavigation();
+                    },
+                  ),
+                ),
               ],
             ),
             floatingActionButton: panelPosition == 0.0

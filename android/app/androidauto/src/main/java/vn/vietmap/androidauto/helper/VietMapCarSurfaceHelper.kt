@@ -248,6 +248,109 @@ class VietMapCarSurfaceHelper(
                 .build())
     }
 
+    fun updateOnSingleMarkerChosen() {
+        actionStripBuilder = ActionStrip.Builder()
+
+        actionStripBuilder.addAction(
+            Action.Builder()
+                .setTitle("Chỉ đường")
+                .setOnClickListener {
+                    behaviorHandler.initiateRouteFromMarker(false)
+                }
+                .build()
+        )
+        actionStripBuilder.addAction(
+            Action.Builder()
+                .setTitle("Di chuyển")
+                .setOnClickListener {
+                    behaviorHandler.initiateRouteFromMarker(true)
+                }
+                .build()
+        )
+        actionStripBuilder.addAction(
+            Action.Builder()
+                .setIcon(
+                    CarIcon.Builder(
+                        IconCompat.createWithResource(
+                            carContext,
+                            R.drawable.recenter
+                        )
+                    ).build()
+                )
+                .setOnClickListener {
+                    behaviorHandler.recenter()
+                }
+                .build()
+        )
+
+        actionStripBuilder.addAction(
+            Action.Builder()
+                .setIcon(
+                    CarIcon.Builder(
+                        IconCompat.createWithResource(
+                            carContext,
+                            R.drawable.close
+                        )
+                    ).build()
+                )
+                .setOnClickListener {
+                    behaviorHandler.stopNavigation()
+                }
+                .build()
+        )
+
+
+        navigationTemplateBuilder.setActionStrip(actionStripBuilder.build())
+
+        // Set the map action strip with the pan and zoom buttons.
+        val panIconBuilder = CarIcon.Builder(
+            IconCompat.createWithResource(
+                carContext,
+                R.drawable.minus
+            )
+        )
+
+        navigationTemplateBuilder.setMapActionStrip(
+            ActionStrip.Builder()
+                .addAction(
+                    Action.Builder(Action.PAN)
+                        .setIcon(panIconBuilder.build())
+                        .build()
+                )
+                .addAction(
+                    Action.Builder()
+                        .setIcon(
+                            CarIcon.Builder(
+                                IconCompat.createWithResource(
+                                    carContext,
+                                    R.drawable.add
+                                )
+                            )
+                                .build()
+                        )
+                        .setOnClickListener {
+                            behaviorHandler.zoomIn()
+                        }
+                        .build())
+                .addAction(
+                    Action.Builder()
+                        .setIcon(
+                            CarIcon.Builder(
+                                IconCompat.createWithResource(
+                                    carContext,
+                                    R.drawable.minus
+                                )
+                            )
+                                .build()
+                        )
+                        .setOnClickListener {
+                            behaviorHandler.zoomOut()
+                        }
+                        .build())
+                .build())
+
+    }
+
     fun updateOnRouteBuiltTemplate() {
         actionStripBuilder = ActionStrip.Builder()
         // Set the action strip.

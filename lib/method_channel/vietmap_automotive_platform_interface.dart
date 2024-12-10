@@ -53,4 +53,18 @@ abstract class VietmapAutomotivePlatformInterface extends PlatformInterface {
   }) {
     throw UnimplementedError('removeMarkers() has not been implemented.');
   }
+
+  Future<bool?> selectSearchResult({
+    required String refId,
+  }) {
+    throw UnimplementedError('selectSearchResult() has not been implemented.');
+  }
+
+  Future<bool?> startNavigation() {
+    throw UnimplementedError('startNavigation() has not been implemented.');
+  }
+
+  Future<bool?> createRoute() {
+    throw UnimplementedError('createRoute() has not been implemented.');
+  }
 }

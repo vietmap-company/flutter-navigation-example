@@ -27,6 +27,7 @@ class MapBloc extends Bloc<MapEvent, MapState> {
   MapBloc() : super(const MapStateInitial()) {
     on<MapEventSearchAddress>(_onMapEventSearchAddress);
     on<MapEventGetDetailAddress>(_onMapEventGetDetailAddress);
+    on<MapEventGetDetailAddressById>(_onMapEventGetDetailAddressById);
     on<MapEventGetEntryPointDetailAddress>(
         _onMapEventGetEntryPointDetailAddress);
 
@@ -187,8 +188,34 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     emit(MapStateLoading(state));
     EasyLoading.show();
     AddHistorySearchUseCase(HistorySearchRepositories()).call(event.model);
-    var response = await GetPlaceDetailUseCase(VietmapApiRepositories())
-        .call(event.model.refId ?? '');
+    var response;
+    await Future.wait(
+      [
+        GetPlaceDetailUseCase(VietmapApiRepositories())
+            .call(event.model.refId ?? '')
+            .then(
+          (value) {
+            response = value;
+          },
+        ),
+        _vietMapAutomotivePlugin.selectSearchResult(
+          refId: event.model.refId ?? '',
+        ),
+      ],
+    );
+    await EasyLoading.dismiss();
+    response.fold((l) => emit(MapStateGetPlaceDetailError('Error', state)),
+        (r) {
+      emit(MapStateGetPlaceDetailSuccess(r, state));
+    });
+  }
+
+  _onMapEventGetDetailAddressById(
+      MapEventGetDetailAddressById event, Emitter<MapState> emit) async {
+    emit(MapStateLoading(state));
+    EasyLoading.show();
+    var response =
+        await GetPlaceDetailUseCase(VietmapApiRepositories()).call(event.refId);
     EasyLoading.dismiss();
     response.fold((l) => emit(MapStateGetPlaceDetailError('Error', state)),
         (r) {

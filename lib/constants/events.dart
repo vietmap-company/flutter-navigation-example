@@ -9,4 +9,7 @@ class Events {
   static const String addMarkers = 'addMarkers';
   static const String queryTextUpdated = 'queryTextUpdated';
   static const String onFeatureClicked = 'onFeatureClicked';
+  static const String selectSearchResult = 'selectSearchResult';
+  static const String onStartNavigation = 'startNavigation';
+  static const String onCreateRoute = 'createRoute';
 }

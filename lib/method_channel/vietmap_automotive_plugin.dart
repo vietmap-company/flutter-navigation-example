@@ -49,4 +49,20 @@ class VietMapAutomotivePlugin {
       query: query,
     );
   }
+
+  Future<bool?> selectSearchResult({required String refId}) async {
+    final result =
+        await VietmapAutomotivePlatformInterface.instance.selectSearchResult(
+      refId: refId,
+    );
+    return result;
+  }
+
+  Future<bool?> startNavigation() async {
+    return await VietmapAutomotivePlatformInterface.instance.startNavigation();
+  }
+
+  Future<bool?> createRoute() async {
+    return await VietmapAutomotivePlatformInterface.instance.createRoute();
+  }
 }
