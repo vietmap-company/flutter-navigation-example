@@ -10,4 +10,8 @@ interface IAndroidAutoNavigationCommunicator {
     fun addMarkers(call: MethodCall, result: Result)
     fun onStartNavigation(call: MethodCall, result: Result)
     fun onCreateRoute(result: Result)
+    fun onStopNavigation(result: Result)
+    fun onCancelNavigation(result: Result)
+    fun onRecenter()
+    fun onOverview()
 }

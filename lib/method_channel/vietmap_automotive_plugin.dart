@@ -65,4 +65,16 @@ class VietMapAutomotivePlugin {
   Future<bool?> createRoute() async {
     return await VietmapAutomotivePlatformInterface.instance.createRoute();
   }
+
+  Future<bool?> cancelNavigation() async {
+    return await VietmapAutomotivePlatformInterface.instance.cancelNavigation();
+  }
+
+  Future<void> recenter() async {
+    await VietmapAutomotivePlatformInterface.instance.recenter();
+  }
+  
+  Future<void> overview() async {
+    await VietmapAutomotivePlatformInterface.instance.overview();
+  }
 }

@@ -65,7 +65,6 @@ class MainActivity: FlutterActivity(), LifecycleObserver {
                     androidAutoCommunicator?.removeRoutes(result)
                 }
                 "navigateToSearch" -> {
-                    Log.d("MainActivity", "navigateToSearch")
                     androidAutoCommunicator?.navigateToSearch(result)
                 }
                 "addMarkers" -> {
@@ -85,6 +84,18 @@ class MainActivity: FlutterActivity(), LifecycleObserver {
                 }
                 "createRoute" -> {
                     androidAutoCommunicator?.onCreateRoute(result)
+                }
+                "stopNavigation" -> {
+                    androidAutoCommunicator?.onStopNavigation(result)
+                }
+                "cancelNavigation" -> {
+                    androidAutoCommunicator?.onCancelNavigation(result)
+                }
+                "recenter" -> {
+                    androidAutoCommunicator?.onRecenter()
+                }
+                "overview" -> {
+                    androidAutoCommunicator?.onOverview()
                 }
                 else -> result.notImplemented()
             }

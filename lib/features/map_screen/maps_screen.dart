@@ -64,69 +64,6 @@ class _MapScreenState extends State<MapScreen> {
         ..maskColor = Colors.grey.withOpacity(0.2)
         ..userInteractions = true
         ..dismissOnTap = false;
-      _channel.setMethodCallHandler(
-        (call) async {
-          switch (call.method) {
-            case Events.navigateToSearch:
-              _navigateToSearch();
-              break;
-            case Events.stopNavigation:
-              _panelController.hide();
-              _clearMarker();
-              break;
-            case Events.onFeatureClicked:
-              _panelController.hide();
-              _clearMarker();
-              final args = Map<String, dynamic>.from(call.arguments);
-              final snippet = args['snippet'] as String?;
-              final title = args['title'] as String?;
-              final lat = args['latitude'];
-              final lng = args['longitude'];
-
-              context.read<MapBloc>().add(
-                    MapEventUserClickOnMapPoint(
-                      placeShortName: snippet ?? '',
-                      placeName: title ?? '',
-                      coordinate: LatLng(lat ?? 0, lng ?? 0),
-                      isSendingEvent: false,
-                    ),
-                  );
-
-              break;
-            case Events.onStartNavigation:
-              final args = Map<String, dynamic>.from(call.arguments);
-
-              Navigator.pushNamed(
-                context,
-                Routes.routingScreen,
-                arguments: RoutingParamsModel.fromChannelReceived(
-                  lat: args['latitude'],
-                  lng: args['longitude'],
-                  name: args['title'],
-                  snippet: args['snippet'],
-                  isStartNavigation: true,
-                ),
-              );
-              break;
-            case Events.onCreateRoute:
-              final args = Map<String, dynamic>.from(call.arguments);
-
-              Navigator.pushNamed(
-                context,
-                Routes.routingScreen,
-                arguments: RoutingParamsModel.fromChannelReceived(
-                  lat: args['latitude'],
-                  lng: args['longitude'],
-                  name: args['title'],
-                  snippet: args['snippet'],
-                  isStartNavigation: false,
-                ),
-              );
-              break;
-            default:
-          }
-        },
-      );
       Future.delayed(const Duration(milliseconds: 200)).then((value) {
         _panelController.hide();
       });
@@ -252,9 +189,75 @@ class _MapScreenState extends State<MapScreen> {
                   initialCameraPosition: const CameraPosition(
                       target: LatLng(10.762201, 106.654213), zoom: 10),
                   onMapCreated: (controller) {
-                    setState(() {
-                      _controller = controller;
-                    });
+                    _controller = controller;
+                    _channel.setMethodCallHandler(
+                      (call) async {
+                        switch (call.method) {
+                          case Events.navigateToSearch:
+                            _navigateToSearch();
+                            break;
+                          case Events.stopNavigation:
+                            _panelController.hide();
+                            _clearMarker();
+                            break;
+                          case Events.onFeatureClicked:
+                            _panelController.hide();
+                            _clearMarker();
+                            final args =
+                                Map<String, dynamic>.from(call.arguments);
+                            final snippet = args['snippet'] as String?;
+                            final title = args['title'] as String?;
+                            final lat = args['latitude'];
+                            final lng = args['longitude'];
+
+                            context.read<MapBloc>().add(
+                                  MapEventUserClickOnMapPoint(
+                                    placeShortName: snippet ?? '',
+                                    placeName: title ?? '',
+                                    coordinate: LatLng(lat ?? 0, lng ?? 0),
+                                    isSendingEvent: false,
+                                  ),
+                                );
+
+                            break;
+                          case Events.onStartNavigation:
+                            final args =
+                                Map<String, dynamic>.from(call.arguments);
+                            Navigator.pushNamed(
+                              context,
+                              Routes.routingScreen,
+                              arguments: RoutingParamsModel.fromChannelReceived(
+                                lat: args['latitude'],
+                                lng: args['longitude'],
+                                name: args['title'],
+                                snippet: args['snippet'],
+                                isStartNavigation: true,
+                              ),
+                            );
+                            break;
+                          case Events.onCreateRoute:
+                            final args =
+                                Map<String, dynamic>.from(call.arguments);
+
+                            Navigator.pushNamed(
+                              context,
+                              Routes.routingScreen,
+                              arguments: RoutingParamsModel.fromChannelReceived(
+                                lat: args['latitude'],
+                                lng: args['longitude'],
+                                name: args['title'],
+                                snippet: args['snippet'],
+                                isStartNavigation: false,
+                              ),
+                            );
+                            break;
+                          case Events.onRecenter:
+                            await _controller?.recenter();
+                            break;
+                          default:
+                        }
+                      },
+                    );
                   },
                   onMapClick: (point, coordinates) async {
                     _panelController.hide();
@@ -419,6 +422,19 @@ class _MapScreenState extends State<MapScreen> {
                 ? Column(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
+                      FloatingActionButton(
+                        heroTag: "recenter",
+                        backgroundColor: Colors.white,
+                        onPressed: () async {
+                          await _controller?.recenter();
+                          await _mapAutomotivePlugin.recenter();
+                        },
+                        child: Icon(
+                          Icons.center_focus_strong,
+                          color: Colors.grey[800],
+                        ),
+                      ),
+                      const SizedBox(height: 10),
                       FloatingActionButton(
                         heroTag: "myLocation",
                         backgroundColor: Colors.white,

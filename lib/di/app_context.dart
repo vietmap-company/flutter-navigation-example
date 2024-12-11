@@ -7,6 +7,8 @@ class AppContext {
       MethodChannel('vn.vietmap.automotive/maps');
   static const MethodChannel _searchChannel =
       MethodChannel('vn.vietmap.automotive/search');
+  static const MethodChannel _navigationChannel =
+      MethodChannel('vn.vietmap.automotive/navigation');
 
   factory AppContext() {
     return _singleton;
@@ -31,5 +33,9 @@ class AppContext {
 
   static MethodChannel getSearchChannel() {
     return _searchChannel;
+  }
+
+  static MethodChannel getNavigationChannel() {
+    return _navigationChannel;
   }
 }

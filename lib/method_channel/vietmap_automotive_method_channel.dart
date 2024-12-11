@@ -11,14 +11,6 @@ class MethodChannelVietmapAutomotivePlugin
   @visibleForTesting
   final methodChannel = const MethodChannel('vn.vietmap.automotive');
 
-  @visibleForTesting
-  final searchMethodChannel =
-      const MethodChannel('vn.vietmap.automotive/search');
-
-  @visibleForTesting
-  final navigationChannel =
-      const MethodChannel('vn.vietmap.automotive/navigation');
-
   @override
   Future<num?> getDistanceToLocation({
     required LatLng location,
@@ -108,5 +100,23 @@ class MethodChannelVietmapAutomotivePlugin
     final result =
         await methodChannel.invokeMethod<bool?>(Events.onCreateRoute);
     return result;
+  }
+
+  @override
+  Future<bool?> cancelNavigation() async {
+    final result = await methodChannel.invokeMethod<bool?>(
+      Events.onCancelNavigation,
+    );
+    return result;
+  }
+
+  @override
+  Future<void> recenter() async {
+    await methodChannel.invokeMethod<void>(Events.onRecenter);
+  }
+
+  @override
+  Future<void> overview() async {
+    await methodChannel.invokeMethod<void>(Events.onOverview);
   }
 }

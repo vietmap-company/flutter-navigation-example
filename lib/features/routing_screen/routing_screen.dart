@@ -1,6 +1,7 @@
 // ignore_for_file: deprecated_member_use
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:sliding_up_panel2/sliding_up_panel2.dart';
@@ -15,6 +16,8 @@ import 'package:vietmap_map/constants/colors.dart';
 import 'package:vietmap_map/domain/entities/vietmap_model.dart';
 import 'package:vietmap_map/extension/latlng_extension.dart';
 import 'package:vietmap_map/features/routing_screen/components/routing_header.dart';
+import 'package:vietmap_map/method_channel/vietmap_automotive_plugin.dart';
+import '../../constants/events.dart';
 import '../../di/app_context.dart';
 import '../map_screen/bloc/map_bloc.dart';
 import '../map_screen/bloc/map_state.dart';
@@ -32,6 +35,9 @@ class RoutingScreen extends StatefulWidget {
 }
 
 class _RoutingScreenState extends State<RoutingScreen> {
+  final MethodChannel _navigationChannel = AppContext.getNavigationChannel();
+  final VietMapAutomotivePlugin _vietmapAutomotivePlugin =
+      VietMapAutomotivePlugin();
   bool isFromOrigin = true;
   final PanelController _panelController = PanelController();
   double panelPosition = 0.0;
@@ -72,18 +78,6 @@ class _RoutingScreenState extends State<RoutingScreen> {
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
       Future.delayed(const Duration(milliseconds: 200))
           .then((value) => _panelController.hide());
-      if (ModalRoute.of(context)!.settings.arguments != null) {
-        var args = ModalRoute.of(context)!.settings.arguments as VietmapModel;
-        routingBloc.add(RoutingEventUpdateRouteParams(
-            destinationDescription: args.getAddress() ?? 'Vị trí đã chọn',
-            destinationPoint: LatLng(args.lat ?? 0, args.lng ?? 0)));
-      }
-
-      var position = await Geolocator.getCurrentPosition();
-      if (!mounted) return;
-      routingBloc.add(RoutingEventUpdateRouteParams(
-          originDescription: 'Vị trí của bạn',
-          originPoint: LatLng(position.latitude, position.longitude)));
     });
   }
 
@@ -131,6 +125,7 @@ class _RoutingScreenState extends State<RoutingScreen> {
                               child: const Text('Không')),
                           TextButton(
                               onPressed: () {
+                                _vietmapAutomotivePlugin.stopNavigation();
                                 _navigationController?.finishNavigation();
                                 _onStopNavigation();
                                 Navigator.pop(context);
@@ -140,6 +135,7 @@ class _RoutingScreenState extends State<RoutingScreen> {
                       ));
               return Future.value(false);
             }
+            _vietmapAutomotivePlugin.stopNavigation();
             routingBloc.add(RoutingEventClearDirection());
             return Future.value(true);
           },
@@ -156,6 +152,9 @@ class _RoutingScreenState extends State<RoutingScreen> {
                           isFromOrigin = true;
                         });
                       },
+                      onBackButtonTapCallback: () {
+                        _vietmapAutomotivePlugin.stopNavigation();
+                      },
                       onDestinationTapCallback: () => setState(() {
                         isFromOrigin = false;
                       }),
@@ -170,6 +169,51 @@ class _RoutingScreenState extends State<RoutingScreen> {
                             RoutingEventNativeRouteBuilt(directionRoute: p0));
                       },
                       onMapRendered: () async {
+                        _navigationChannel.setMethodCallHandler(
+                          (call) async {
+                            switch (call.method) {
+                              case Events.stopNavigation:
+                                _onStopNavigation();
+                                break;
+                              case Events.onCancelNavigation:
+                                _onStopNavigation();
+                                break;
+
+                              case Events.onStartNavigation:
+                                await _navigationController?.startNavigation();
+                                setState(() {
+                                  _isRunning = true;
+                                });
+                                break;
+                              case Events.onRecenter:
+                                await _navigationController?.recenter();
+                                break;
+                              case Events.onOverview:
+                                await _navigationController?.overview();
+                                _showRecenterButton();
+                                break;
+                              default:
+                            }
+                          },
+                        );
+                        if (ModalRoute.of(context)!.settings.arguments !=
+                            null) {
+                          var args = ModalRoute.of(context)!.settings.arguments
+                              as VietmapModel;
+                          routingBloc.add(RoutingEventUpdateRouteParams(
+                              destinationDescription:
+                                  args.getAddress() ?? 'Vị trí đã chọn',
+                              destinationPoint:
+                                  LatLng(args.lat ?? 0, args.lng ?? 0)));
+                        }
+
+                        var position = await Geolocator.getCurrentPosition();
+                        if (!mounted) return;
+                        routingBloc.add(RoutingEventUpdateRouteParams(
+                            originDescription: 'Vị trí của bạn',
+                            originPoint:
+                                LatLng(position.latitude, position.longitude)));
+
                         EasyLoading.show();
                         if (ModalRoute.of(context)!.settings.arguments !=
                             null) {
@@ -257,12 +301,16 @@ class _RoutingScreenState extends State<RoutingScreen> {
                             child: VietmapBottomActionView(
                                 controller: _navigationController,
                                 onStopNavigationCallback: () {
+                                  _vietmapAutomotivePlugin.cancelNavigation();
                                   setState(() {
                                     _isRunning = false;
                                   });
                                 },
                                 routeProgressEvent: routeProgressEvent,
-                                onOverviewCallback: _showRecenterButton,
+                                onOverviewCallback: () {
+                                  _vietmapAutomotivePlugin.overview();
+                                  _showRecenterButton();
+                                },
                                 recenterButton: recenterButton),
                           )
                         : SlidingUpPanel(
@@ -288,6 +336,7 @@ class _RoutingScreenState extends State<RoutingScreen> {
                                   },
                                   panelPosition: panelPosition,
                                   onStartNavigation: () {
+                                    _vietmapAutomotivePlugin.startNavigation();
                                     _navigationController?.startNavigation();
                                     setState(() {
                                       _isRunning = true;
@@ -314,6 +363,7 @@ class _RoutingScreenState extends State<RoutingScreen> {
         })),
         onPressed: () {
           _navigationController?.recenter();
+          _vietmapAutomotivePlugin.recenter();
           recenterButton = const SizedBox.shrink();
         },
         child: Container(

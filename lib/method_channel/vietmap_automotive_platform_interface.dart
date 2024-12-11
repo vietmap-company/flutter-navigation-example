@@ -67,4 +67,15 @@ abstract class VietmapAutomotivePlatformInterface extends PlatformInterface {
   Future<bool?> createRoute() {
     throw UnimplementedError('createRoute() has not been implemented.');
   }
+
+  Future<bool?> cancelNavigation() {
+    throw UnimplementedError('cancelNavigation() has not been implemented.');
+  }
+
+  Future<void> recenter() {
+    throw UnimplementedError('recenter() has not been implemented.');
+  }
+  Future<void> overview() {
+    throw UnimplementedError('overview() has not been implemented.');
+  }
 }

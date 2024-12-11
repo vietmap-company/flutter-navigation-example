@@ -12,4 +12,7 @@ class Events {
   static const String selectSearchResult = 'selectSearchResult';
   static const String onStartNavigation = 'startNavigation';
   static const String onCreateRoute = 'createRoute';
+  static const String onCancelNavigation = 'cancelNavigation';
+  static const String onRecenter = 'recenter';
+  static const String onOverview = 'overview';
 }
