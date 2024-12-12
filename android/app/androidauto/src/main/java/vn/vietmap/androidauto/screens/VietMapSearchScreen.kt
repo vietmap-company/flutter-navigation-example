@@ -16,13 +16,18 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
 import androidx.lifecycle.lifecycleScope
+import androidx.room.Room
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import vn.vietmap.androidauto.cache.AppCacheDatabase
+import vn.vietmap.androidauto.cache.PlaceItemDAO
 import vn.vietmap.androidauto.model.PlaceItem
 import vn.vietmap.androidauto.service.IAndroidAutoSearchCommunicator
 import vn.vietmap.androidauto.service.SearchScreenService
@@ -34,12 +39,16 @@ import vn.vietmap.vietmapsdk.location.engine.LocationEngineResult
 import java.lang.Exception
 
 class VietMapSearchScreen(carContext: CarContext): Screen(carContext), LifecycleObserver, IAndroidAutoSearchCommunicator {
+    private val appCacheDatabase = Room.databaseBuilder(carContext, AppCacheDatabase::class.java, "app-cache-database").build()
+    private val placeItemDAO: PlaceItemDAO
     private val searchScreenService : SearchScreenService = ServiceGenerator.createService(SearchScreenService::class.java)
     private var locationEngine: LocationEngine? = null
-    private var placeItems : List<PlaceItem> = emptyList()
+    private var placeItems : ArrayList<PlaceItem> = ArrayList()
     private var searchMethodChannel: MethodChannel? = null
     private var flutterEngine: FlutterEngine? = null
     private var searchText: String = ""
+    private val ioCoroutineScope : CoroutineScope = CoroutineScope(Dispatchers.IO)
+    private val cachePlaceItems : ArrayList<PlaceItem> = ArrayList()
 
     companion object {
         const val VIETMAP_ANDROID_AUTO_CHANNEL = "vn.vietmap.automotive/search"
@@ -56,6 +65,10 @@ class VietMapSearchScreen(carContext: CarContext): Screen(carContext), Lifecycle
         lifecycle.addObserver(this)
         locationEngine = LocationEngineProvider.getBestLocationEngine(carContext)
         setSearchScreenInstance(this)
+        placeItemDAO = appCacheDatabase.placeItemDAO()
+        ioCoroutineScope.launch {
+            getInitialPlaceItems()
+        }
     }
 
     fun initFlutterEngine(flutterEngine: FlutterEngine){
@@ -78,7 +91,7 @@ class VietMapSearchScreen(carContext: CarContext): Screen(carContext), Lifecycle
         }
     }
     private fun performSearch(query: String, latLngString: String?){
-        lifecycleScope.launch {
+        ioCoroutineScope.launch {
             delay(500)
             val resp = searchScreenService.autocomplete(query, latLngString)
             setResults(if (resp.isSuccessful) resp.body() ?: emptyList() else emptyList())
@@ -87,7 +100,10 @@ class VietMapSearchScreen(carContext: CarContext): Screen(carContext), Lifecycle
 
 
     private fun setResults(results: List<PlaceItem>){
-        placeItems = results.toList()
+        placeItems.let {
+            it.clear()
+            it.addAll(results)
+        }
         val itemList = ItemList.Builder()
         results.forEach{
             itemList.addItem(
@@ -112,14 +128,59 @@ class VietMapSearchScreen(carContext: CarContext): Screen(carContext), Lifecycle
     private fun onPlaceSelected(placeItem: PlaceItem){
         // Pop back to navigation place and set destination
         searchMethodChannel?.invokeMethod("selectSearchResult", mapOf("refId" to placeItem.ref_id))
-        lifecycleScope.launch {
+        ioCoroutineScope.launch {
             val resp = searchScreenService.getPlaceDetail(placeItem.ref_id)
             if(resp.isSuccessful){
+                addPlaceItemToCache(placeItem)
                 setResult(resp.body())
-                finish()
+                lifecycleScope.launch {
+                    finish()
+                }
             }
         }
     }
+
+    private fun addPlaceItemToCache(placeItem: PlaceItem){
+        val cachePlaceItems = placeItemDAO.getAll()
+        if(cachePlaceItems.size >= 5){
+            placeItemDAO.delete(cachePlaceItems[0])
+        }
+        cachePlaceItems.forEach {
+            if(it.ref_id == placeItem.ref_id){
+                placeItemDAO.delete(it)
+            }
+        }
+        placeItemDAO.insertAll(placeItem)
+        this.cachePlaceItems.let {
+            it.clear()
+            it.add(placeItem)
+        }
+    }
+
+    private fun getInitialPlaceItems(){
+        cachePlaceItems.let {
+            it.clear()
+            it.addAll(placeItemDAO.getAll().reversed())
+        }
+        refreshSearchTemplate()
+        searchTemplate.setItemList(
+            ItemList.Builder()
+                .apply {
+                    cachePlaceItems.forEach {
+                        addItem(
+                            Row.Builder()
+                                .setTitle(it.name)
+                                .setOnClickListener { onPlaceSelected(it) }
+                                .addText(it.address)
+                                .build()
+                        )
+                    }
+                }
+                .build()
+        )
+        invalidate()
+    }
+
     private var backAction = Action.Builder()
         .setIcon(CarIcon.BACK)
         .setOnClickListener { onBackPressed() }
@@ -194,11 +255,13 @@ class VietMapSearchScreen(carContext: CarContext): Screen(carContext), Lifecycle
     override fun onSearchResultSelected(call: MethodCall, result: MethodChannel.Result) {
         val args = call.arguments as Map<*, *>
         val refId = args["refId"] as String
-        lifecycleScope.launch {
+        ioCoroutineScope.launch {
             val resp = searchScreenService.getPlaceDetail(refId)
             if(resp.isSuccessful){
                 setResult(resp.body())
-                finish()
+                lifecycleScope.launch {
+                    finish()
+                }
             }
         }
         result.success(true)

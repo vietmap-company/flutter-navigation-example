@@ -1,4 +1,12 @@
 package vn.vietmap.androidauto.model
 
-data class PlaceItem(val ref_id: String, val address: String, val name: String)
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+
+@Entity
+data class PlaceItem(
+    @PrimaryKey val ref_id: String,
+    val address: String,
+    val name: String
+)
 

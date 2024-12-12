@@ -1,33 +1,24 @@
 package vn.vietmap.androidauto.screens
 
 import android.annotation.SuppressLint
-import android.content.DialogInterface
 import android.graphics.Color
 import android.graphics.PointF
 import android.location.Location
 import android.os.Build
 import android.util.Log
-import android.widget.Toast
 import androidx.annotation.RequiresApi
-import androidx.car.app.AppManager
 import androidx.car.app.CarContext
 import androidx.car.app.OnScreenResultListener
 import androidx.car.app.Screen
 import androidx.car.app.ScreenManager
 import androidx.car.app.SurfaceCallback
-import androidx.car.app.model.Alert
-import androidx.car.app.model.CarText
 import androidx.car.app.model.Template
-import androidx.car.app.navigation.model.Maneuver
-import androidx.car.app.notification.CarAppExtender
-import androidx.core.app.NotificationCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsRoute
-import com.mapbox.api.directions.v5.models.DirectionsWaypoint
 import com.mapbox.geojson.Point
 import com.mapbox.turf.TurfMisc
 import io.flutter.embedding.engine.FlutterEngine
@@ -66,10 +57,10 @@ import vn.vietmap.services.android.navigation.v5.navigation.VietmapNavigation
 import vn.vietmap.services.android.navigation.v5.navigation.VietmapNavigationOptions
 import vn.vietmap.services.android.navigation.v5.offroute.OffRouteListener
 import vn.vietmap.services.android.navigation.v5.route.FasterRouteListener
-import vn.vietmap.services.android.navigation.v5.route.OnRouteSelectionChangeListener
 import vn.vietmap.services.android.navigation.v5.routeprogress.ProgressChangeListener
 import vn.vietmap.services.android.navigation.v5.routeprogress.RouteProgress
 import vn.vietmap.services.android.navigation.v5.snap.SnapToRoute
+import vn.vietmap.services.android.navigation.v5.utils.RouteUtils
 import vn.vietmap.vietmapsdk.annotations.IconFactory
 import vn.vietmap.vietmapsdk.annotations.Marker
 import vn.vietmap.vietmapsdk.annotations.MarkerOptions
@@ -103,6 +94,8 @@ class VietMapNavigationScreen(
     OffRouteListener, MilestoneEventListener, NavigationEventListener, NavigationListener,
     FasterRouteListener, SpeechAnnouncementListener, BannerInstructionsListener, RouteListener,
     IVietMapCarMapController, IAndroidAutoNavigationCommunicator, LifecycleObserver{
+
+    private var routeUtils = RouteUtils()
 
     private var routeClicked: Boolean = false
     private var currentRoute: DirectionsRoute? = null
@@ -481,7 +474,6 @@ class VietMapNavigationScreen(
                 vietmapGL?.infoWindowAdapter = vietmapInfoWindowAdapter
                 vietmapGL?.setOnMarkerClickListener {
                         m ->
-                    Log.d("VietMapNavigationScreen", "Marker clicked: ${m.title}")
                     m.showInfoWindow(vietmapGL!!, mSurfaceRenderer.getMapView()!!)
                     true
                 }
@@ -755,11 +747,21 @@ class VietMapNavigationScreen(
     }
 
     override fun onMilestoneEvent(
-        routeProgress: RouteProgress?,
-        instruction: String?,
-        milestone: Milestone?,
+        routeProgress: RouteProgress,
+        instruction: String,
+        milestone: Milestone,
     ) {
-//        playVoiceAnnouncement(milestone)
+        playVoiceAnnouncement(milestone)
+        if (routeUtils.isArrivalEvent(routeProgress, milestone) && isNavigationInProgress) {
+            vietmapGL?.locationComponent?.locationEngine = locationEngine
+
+            isPreviewingRoute = false
+            onStopNavigationFunction()
+            if(markers?.isNotEmpty() == true){
+                vietMapCarSurfaceHelper.updateOnSingleMarkerChosen()
+                invalidate()
+            }
+        }
     }
 
     override fun onRunning(running: Boolean) {
@@ -1098,6 +1100,10 @@ class VietMapNavigationScreen(
     override fun onStopNavigation(result: MethodChannel.Result) {
         isPreviewingRoute = false
         onStopNavigationFunction()
+        if(markers?.isNotEmpty() == true){
+            vietMapCarSurfaceHelper.updateOnSingleMarkerChosen()
+            invalidate()
+        }
         result.success(true)
     }
 
@@ -1169,6 +1175,9 @@ class VietMapNavigationScreen(
 
     @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
     fun onDestroy() {
+        mapMethodChannel?.setMethodCallHandler(null)
+        navigationMethodChannel?.setMethodCallHandler(null)
         mapMethodChannel = null
+        navigationMethodChannel = null
     }
 }

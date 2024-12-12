@@ -192,6 +192,9 @@ class _RoutingScreenState extends State<RoutingScreen> {
                                 await _navigationController?.overview();
                                 _showRecenterButton();
                                 break;
+                              case Events.onFinishNavigation:
+                                await _navigationController?.finishNavigation();
+                                break;
                               default:
                             }
                           },

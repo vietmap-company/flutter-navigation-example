@@ -15,4 +15,5 @@ class Events {
   static const String onCancelNavigation = 'cancelNavigation';
   static const String onRecenter = 'recenter';
   static const String onOverview = 'overview';
+  static const String onFinishNavigation = 'finishNavigation';
 }
