@@ -7,7 +7,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:sliding_up_panel2/sliding_up_panel2.dart';
 import 'package:talker/talker.dart';
 import 'package:vietmap_flutter_gl/vietmap_flutter_gl.dart';
-import 'package:vietmap_map/extension/tilemap_extension.dart';
+import 'package:vietmap_gl_platform_interface/vietmap_gl_platform_interface.dart';
 import 'package:vietmap_map/features/map_screen/components/category_marker.dart';
 import 'package:vietmap_map/method_channel/vietmap_automotive_plugin.dart';
 import '../../constants/colors.dart';
@@ -41,8 +41,8 @@ class _MapScreenState extends State<MapScreen> {
   bool isShowMarker = true;
   final PanelController _panelController = PanelController();
   MyLocationTrackingMode myLocationTrackingMode =
-      MyLocationTrackingMode.Tracking;
-  MyLocationRenderMode myLocationRenderMode = MyLocationRenderMode.COMPASS;
+      MyLocationTrackingMode.tracking;
+  MyLocationRenderMode myLocationRenderMode = MyLocationRenderMode.compass;
   final talker = Talker();
   String tileMap = AppContext.getVietmapMapStyleUrl() ?? "";
   @override
@@ -95,8 +95,8 @@ class _MapScreenState extends State<MapScreen> {
           setState(() {});
         }
         if (state is MapStateChangeMapTilesSuccess) {
-          _controller?.setStyle(
-              state.mapTile.getMapTiles(AppContext.getVietmapAPIKey() ?? ""));
+          // _controller?.setStyle(
+          //     state.mapTile.getMapTiles(AppContext.getVietmapAPIKey() ?? ""));
         }
         if (state is MapStateGetLocationFromCoordinateSuccess &&
             ModalRoute.of(context)?.isCurrent == true) {
@@ -178,7 +178,7 @@ class _MapScreenState extends State<MapScreen> {
                 VietmapGL(
                   myLocationEnabled: true,
                   myLocationTrackingMode:
-                      MyLocationTrackingMode.TrackingCompass,
+                      MyLocationTrackingMode.trackingCompass,
                   myLocationRenderMode: myLocationRenderMode,
                   trackCameraPosition: true,
                   compassViewMargins:
@@ -252,7 +252,7 @@ class _MapScreenState extends State<MapScreen> {
                             );
                             break;
                           case Events.onRecenter:
-                            await _controller?.recenter();
+                            // await _controller?.recenter();
                             break;
                           default:
                         }
@@ -264,7 +264,7 @@ class _MapScreenState extends State<MapScreen> {
                     _removeRoutes();
                     _clearMarker();
                     var response =
-                        await _controller?.queryRenderedFeatures(point: point);
+                        await _controller?.queryRenderedFeatures(point, [], []);
                     if (response == null || response.isEmpty) return;
                     for (var item in response) {
                       talker.good(item);
@@ -293,13 +293,46 @@ class _MapScreenState extends State<MapScreen> {
                     }
                     // talker.info(response);
                   },
-                  onMapLongClick: (point, coordinates) {
+                  onMapLongClick: (point, coordinates) async {
                     setState(() {
                       _nearbyMarker = [];
                     });
                     context
                         .read<MapBloc>()
                         .add(MapEventOnUserLongTapOnMap(coordinates));
+
+                    // var res = await VietmapApiRepositories().findRoute(
+                    //     VietMapRoutingParams(
+                    //         apiKey: AppContext.getVietmapAPIKey()!,
+                    //         vehicle: VehicleType.motorcycle,
+                    //         originPoint: LatLng(10, 106),
+                    //         destinationPoint: coordinates));
+                    // res.fold((l) {
+                    //   EasyLoading.showError('Có lỗi xảy ra');
+                    // }, (r) {
+                    //   var locs = VietmapPolylineDecoder.decodePolyline(
+                    //           r.paths!.first.points!, false)
+                    //       .map((e) {
+                    //     return LatLng(e.latitude, e.longitude);
+                    //   }).toList();
+                    //   _controller?.addPolyline(PolylineOptions(
+                    //     geometry: locs,
+                    //     polylineWidth: 4,
+                    //     polylineColor: vietmapColor,
+                    //   ));
+                    //   var bbox = r.paths?.first.bbox;
+                    //   if (bbox == null) return;
+                    //   _controller?.moveCamera(CameraUpdate.newLatLngBounds(
+                    //       LatLngBounds(
+                    //           southwest: LatLng(
+                    //               bbox[1]!.toDouble(), bbox[0]!.toDouble()),
+                    //           northeast: LatLng(
+                    //               bbox[3]!.toDouble(), bbox[2]!.toDouble())),
+                    //       left: 200,
+                    //       right: 200,
+                    //       top: 200,
+                    //       bottom: 200));
+                    // });
                   },
                 ),
                 _controller == null
@@ -426,7 +459,7 @@ class _MapScreenState extends State<MapScreen> {
                         heroTag: "recenter",
                         backgroundColor: Colors.white,
                         onPressed: () async {
-                          await _controller?.recenter();
+                          // await _controller?.recenter();
                           await _mapAutomotivePlugin.recenter();
                         },
                         child: Icon(
@@ -440,29 +473,29 @@ class _MapScreenState extends State<MapScreen> {
                         backgroundColor: Colors.white,
                         onPressed: () {
                           if (myLocationTrackingMode !=
-                              MyLocationTrackingMode.TrackingCompass) {
+                              MyLocationTrackingMode.trackingCompass) {
                             _controller?.updateMyLocationTrackingMode(
-                                MyLocationTrackingMode.TrackingCompass);
+                                MyLocationTrackingMode.trackingCompass);
                             setState(() {
                               myLocationTrackingMode =
-                                  MyLocationTrackingMode.TrackingCompass;
+                                  MyLocationTrackingMode.trackingCompass;
                               myLocationRenderMode =
-                                  MyLocationRenderMode.COMPASS;
+                                  MyLocationRenderMode.compass;
                             });
                           } else {
                             _controller?.updateMyLocationTrackingMode(
-                                MyLocationTrackingMode.TrackingGPS);
+                                MyLocationTrackingMode.trackingGps);
                             setState(() {
                               myLocationTrackingMode =
-                                  MyLocationTrackingMode.TrackingGPS;
+                                  MyLocationTrackingMode.trackingGps;
                               myLocationRenderMode =
-                                  MyLocationRenderMode.NORMAL;
+                                  MyLocationRenderMode.normal;
                             });
                           }
                         },
                         child: Icon(
                             myLocationTrackingMode ==
-                                    MyLocationTrackingMode.TrackingCompass
+                                    MyLocationTrackingMode.trackingCompass
                                 ? Icons.compass_calibration_sharp
                                 : Icons.gps_fixed,
                             color: Colors.grey[800]),

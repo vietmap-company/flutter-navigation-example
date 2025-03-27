@@ -1,12 +1,5 @@
 package vn.vietmap.vietmap_map
 
-import android.annotation.SuppressLint
-import android.location.Location
-import android.os.Bundle
-import android.util.Log
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleObserver
-import androidx.lifecycle.OnLifecycleEvent
 import androidx.lifecycle.lifecycleScope
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
@@ -18,7 +11,7 @@ import vn.vietmap.androidauto.service.IAndroidAutoNavigationCommunicator
 import vn.vietmap.androidauto.service.IAndroidAutoSearchCommunicator
 
 
-class MainActivity: FlutterActivity(), LifecycleObserver {
+class MainActivity: FlutterActivity() {
     private var androidAutoCommunicator: IAndroidAutoNavigationCommunicator? = null
     private var androidAutoSearchCommunicator: IAndroidAutoSearchCommunicator? = null
     private lateinit var methodChannel: MethodChannel
@@ -27,12 +20,6 @@ class MainActivity: FlutterActivity(), LifecycleObserver {
         const val VIETMAP_ANDROID_AUTO_CHANNEL = "vn.vietmap.automotive"
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        lifecycle.addObserver(this)
-    }
-
-    @SuppressLint("MissingPermission")
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
         lifecycleScope.launch {
@@ -100,12 +87,5 @@ class MainActivity: FlutterActivity(), LifecycleObserver {
                 else -> result.notImplemented()
             }
         }
-    }
-
-    @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
-    private fun doDestroy() {
-        methodChannel.setMethodCallHandler(null)
-        androidAutoCommunicator = null
-        androidAutoSearchCommunicator = null
     }
 }

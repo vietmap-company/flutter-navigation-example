@@ -77,4 +77,6 @@ dependencies {
     implementation 'com.github.vietmap-company:vietmap-services-turf-android:1.0.2'
     implementation 'com.github.vietmap-company:vietmap-services-android:1.1.2'
     implementation 'com.github.vietmap-company:vietmap-services-geojson-android:1.0.0'
+
+
 }

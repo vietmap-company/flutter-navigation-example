@@ -45,6 +45,7 @@ class VietMapNavigationHelper {
         fun buildOverviewCameraUpdate(
             padding: IntArray, routePoints: List<Point>,
         ): CameraUpdate {
+            if(routePoints.size < 2) return buildResetCameraUpdate()
             val routeBounds = convertRoutePointsToLatLngBounds(routePoints)
             return newLatLngBounds(
                 routeBounds, padding[0], padding[1], padding[2], padding[3]
