@@ -20,4 +20,18 @@ class RoutingParamsModel extends VietmapModel {
         display: model.display,
         isStartNavigation: isStartNavigation);
   }
+  factory RoutingParamsModel.fromChannelReceived({
+    required double? lat,
+    required double? lng,
+    required String? name,
+    required String? snippet,
+    required bool isStartNavigation,
+  }) {
+    return RoutingParamsModel(
+        lat: lat,
+        lng: lng,
+        name: name,
+        display: snippet,
+        isStartNavigation: isStartNavigation);
+  }
 }

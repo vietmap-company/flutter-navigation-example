@@ -27,7 +27,7 @@ if (flutterVersionName == null) {
 android {
     namespace 'vn.vietmap.vietmap_map'
     compileSdk 34
-    ndkVersion flutter.ndkVersion
+    ndkVersion "27.0.12077973"
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -68,5 +68,15 @@ flutter {
 
 dependencies {
     implementation project(':app:androidauto')
+    implementation("androidx.car.app:app:1.3.0-rc01")
+    implementation("com.github.vietmap-company:maps-sdk-android:3.1.0")
+    implementation 'com.github.vietmap-company:maps-sdk-navigation-ui-android:2.3.2'
+    implementation 'com.github.vietmap-company:maps-sdk-navigation-android:2.3.3'
+    implementation 'com.github.vietmap-company:vietmap-services-core:1.0.0'
+    implementation 'com.github.vietmap-company:vietmap-services-directions-models:1.0.1'
+    implementation 'com.github.vietmap-company:vietmap-services-turf-android:1.0.2'
+    implementation 'com.github.vietmap-company:vietmap-services-android:1.1.2'
+    implementation 'com.github.vietmap-company:vietmap-services-geojson-android:1.0.0'
+
 
 }

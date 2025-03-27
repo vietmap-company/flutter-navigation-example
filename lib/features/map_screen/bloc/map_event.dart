@@ -17,6 +17,12 @@ class MapEventGetDetailAddress extends MapEvent {
   MapEventGetDetailAddress(this.model);
 }
 
+class MapEventGetDetailAddressById extends MapEvent {
+  final String refId;
+
+  MapEventGetDetailAddressById(this.refId);
+}
+
 class MapEventGetEntryPointDetailAddress extends MapEvent {
   final String refId;
 
@@ -58,15 +64,22 @@ class MapEventUserClickOnMapPoint extends MapEvent {
   final String placeName;
   final LatLng coordinate;
   final String placeShortName;
+  final bool isSendingEvent;
 
-  MapEventUserClickOnMapPoint(
-      {required this.placeName,
-      required this.placeShortName,
-      required this.coordinate});
+  MapEventUserClickOnMapPoint({
+    required this.placeName,
+    required this.placeShortName,
+    required this.coordinate,
+    this.isSendingEvent = true,
+  });
 }
 
 class MapEventChangeMapTiles extends MapEvent {
   final MapTiles mapType;
 
   MapEventChangeMapTiles(this.mapType);
+}
+
+class MapEventReceiveCreateRoute extends MapEvent {
+  
 }

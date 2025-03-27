@@ -1,4 +1,4 @@
-package vn.vietmap.androidauto
+package vn.vietmap.androidauto.screens
 
 import androidx.car.app.CarContext
 import androidx.car.app.Screen
@@ -11,6 +11,9 @@ import androidx.car.app.model.CarIcon
 import androidx.car.app.model.Template
 import androidx.car.app.navigation.model.NavigationTemplate
 import androidx.core.graphics.drawable.IconCompat
+import vn.vietmap.androidauto.R
+import vn.vietmap.androidauto.car_surface.VietMapAndroidAutoSurface
+import vn.vietmap.androidauto.helper.VietMapNavigationHelper
 import vn.vietmap.vietmapsdk.maps.OnMapReadyCallback
 import vn.vietmap.vietmapsdk.maps.Style
 import vn.vietmap.vietmapsdk.maps.VietMapGL
@@ -30,7 +33,7 @@ class VietMapCarAppScreen(
         mSurfaceRenderer.addOnSurfaceCallbackListener(mSurfaceCallback)
         mSurfaceRenderer.init(
             Style.Builder()
-                .fromUri("https://maps.vietmap.vn/api/maps/light/styles.json?apikey=YOUR_API_KEY_HERE"),
+                .fromUri("https://maps.vietmap.vn/api/maps/light/styles.json?apikey=${VietMapNavigationHelper.apiKey}"),
             OnMapReadyCallback {
                 vietmapGL = it
             }

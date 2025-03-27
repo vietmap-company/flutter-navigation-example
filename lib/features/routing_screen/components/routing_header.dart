@@ -11,9 +11,11 @@ class RoutingHeader extends StatelessWidget {
   const RoutingHeader(
       {super.key,
       required this.onOriginTapCallback,
-      required this.onDestinationTapCallback});
+      required this.onDestinationTapCallback,
+      required this.onBackButtonTapCallback});
   final VoidCallback onOriginTapCallback;
   final VoidCallback onDestinationTapCallback;
+  final VoidCallback onBackButtonTapCallback;
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -39,6 +41,7 @@ class RoutingHeader extends StatelessWidget {
                     padding: const EdgeInsets.all(8.0),
                     child: InkWell(
                         onTap: () {
+                          onBackButtonTapCallback();
                           context
                               .read<RoutingBloc>()
                               .add(RoutingEventClearDirection());

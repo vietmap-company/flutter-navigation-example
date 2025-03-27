@@ -1,4 +1,4 @@
-package vn.vietmap.androidauto
+package vn.vietmap.androidauto.car_surface
 
 import androidx.car.app.CarAppService
 import androidx.car.app.Session

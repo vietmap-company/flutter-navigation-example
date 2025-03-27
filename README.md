@@ -44,7 +44,18 @@ desktop-head-unit.exe   # Windows
 #### 3. Connect the real device to the DHU
 #### 4. Run the app on the real device
 #### 5. Open the Android Auto app on the DHU
+#### 6. Create env file for Android Auto
+- Create `vietmap_api_key.xml` file in `android/app/androidauto/src/main/res/values` folder
+- Add the content as below to `vietmap_api_key.xml` file with your api key
 
+```xml 
+    <?xml version="1.0" encoding="utf-8"?>
+    <resources>
+        <string name="vietmap_api_key">
+            YOUR_API_KEY_HERE
+        </string>
+    </resources>
+```
 
 ## Integration Android Auto 
 - Follow this document to add Android Auto to your project: [VietMap Android Auto SDK](https://github.com/vietmap-company/vietmap-android-auto)

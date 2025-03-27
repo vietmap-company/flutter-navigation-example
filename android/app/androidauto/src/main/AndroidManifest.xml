@@ -11,7 +11,7 @@
             android:name="com.google.android.gms.car.application"
             android:resource="@xml/automotive_app_desc" />
         <service
-            android:name="vn.vietmap.androidauto.VietMapCarAppService"
+            android:name="vn.vietmap.androidauto.car_surface.VietMapCarAppService"
             android:exported="true">
             <intent-filter>
                 <action android:name="androidx.car.app.CarAppService" />
@@ -20,7 +20,7 @@
         </service>
 
         <activity
-            android:name="vn.vietmap.androidauto.VietMapCarAppScreen"
+            android:name="vn.vietmap.androidauto.screens.VietMapCarAppScreen"
             android:label="Preferences"
             android:exported="true"
             tools:ignore="Instantiatable">

@@ -1,16 +1,20 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:sliding_up_panel2/sliding_up_panel2.dart';
 import 'package:talker/talker.dart';
 import 'package:vietmap_flutter_gl/vietmap_flutter_gl.dart';
-import 'package:vietmap_map/extension/tilemap_extension.dart';
+import 'package:vietmap_gl_platform_interface/vietmap_gl_platform_interface.dart';
 import 'package:vietmap_map/features/map_screen/components/category_marker.dart';
+import 'package:vietmap_map/method_channel/vietmap_automotive_plugin.dart';
 import '../../constants/colors.dart';
+import '../../constants/events.dart';
 import '../../constants/route.dart';
 import '../../di/app_context.dart';
+import '../routing_screen/models/routing_params_model.dart';
 import 'bloc/map_bloc.dart';
 import 'bloc/map_event.dart';
 import 'bloc/map_state.dart';
@@ -27,6 +31,9 @@ class MapScreen extends StatefulWidget {
 }
 
 class _MapScreenState extends State<MapScreen> {
+  final VietMapAutomotivePlugin _mapAutomotivePlugin =
+      VietMapAutomotivePlugin.instance;
+  final MethodChannel _channel = AppContext.getMapChannel();
   VietmapController? _controller;
   List<Marker> _markers = [];
   List<Marker> _nearbyMarker = [];
@@ -34,8 +41,8 @@ class _MapScreenState extends State<MapScreen> {
   bool isShowMarker = true;
   final PanelController _panelController = PanelController();
   MyLocationTrackingMode myLocationTrackingMode =
-      MyLocationTrackingMode.Tracking;
-  MyLocationRenderMode myLocationRenderMode = MyLocationRenderMode.COMPASS;
+      MyLocationTrackingMode.tracking;
+  MyLocationRenderMode myLocationRenderMode = MyLocationRenderMode.compass;
   final talker = Talker();
   String tileMap = AppContext.getVietmapMapStyleUrl() ?? "";
   @override
@@ -88,8 +95,8 @@ class _MapScreenState extends State<MapScreen> {
           setState(() {});
         }
         if (state is MapStateChangeMapTilesSuccess) {
-          _controller?.setStyle(
-              state.mapTile.getMapTiles(AppContext.getVietmapAPIKey() ?? ""));
+          // _controller?.setStyle(
+          //     state.mapTile.getMapTiles(AppContext.getVietmapAPIKey() ?? ""));
         }
         if (state is MapStateGetLocationFromCoordinateSuccess &&
             ModalRoute.of(context)?.isCurrent == true) {
@@ -159,10 +166,8 @@ class _MapScreenState extends State<MapScreen> {
         onWillPop: () async {
           if (_panelController.isPanelShown || _panelController.isPanelOpen) {
             _panelController.hide();
-            setState(() {
-              _markers = [];
-              _nearbyMarker = [];
-            });
+            _removeRoutes();
+            _clearMarker();
             return false;
           }
           return true;
@@ -173,7 +178,7 @@ class _MapScreenState extends State<MapScreen> {
                 VietmapGL(
                   myLocationEnabled: true,
                   myLocationTrackingMode:
-                      MyLocationTrackingMode.TrackingCompass,
+                      MyLocationTrackingMode.trackingCompass,
                   myLocationRenderMode: myLocationRenderMode,
                   trackCameraPosition: true,
                   compassViewMargins:
@@ -184,18 +189,82 @@ class _MapScreenState extends State<MapScreen> {
                   initialCameraPosition: const CameraPosition(
                       target: LatLng(10.762201, 106.654213), zoom: 10),
                   onMapCreated: (controller) {
-                    setState(() {
-                      _controller = controller;
-                    });
+                    _controller = controller;
+                    _channel.setMethodCallHandler(
+                      (call) async {
+                        switch (call.method) {
+                          case Events.navigateToSearch:
+                            _navigateToSearch();
+                            break;
+                          case Events.stopNavigation:
+                            _panelController.hide();
+                            _clearMarker();
+                            break;
+                          case Events.onFeatureClicked:
+                            _panelController.hide();
+                            _clearMarker();
+                            final args =
+                                Map<String, dynamic>.from(call.arguments);
+                            final snippet = args['snippet'] as String?;
+                            final title = args['title'] as String?;
+                            final lat = args['latitude'];
+                            final lng = args['longitude'];
+
+                            context.read<MapBloc>().add(
+                                  MapEventUserClickOnMapPoint(
+                                    placeShortName: snippet ?? '',
+                                    placeName: title ?? '',
+                                    coordinate: LatLng(lat ?? 0, lng ?? 0),
+                                    isSendingEvent: false,
+                                  ),
+                                );
+
+                            break;
+                          case Events.onStartNavigation:
+                            final args =
+                                Map<String, dynamic>.from(call.arguments);
+                            Navigator.pushNamed(
+                              context,
+                              Routes.routingScreen,
+                              arguments: RoutingParamsModel.fromChannelReceived(
+                                lat: args['latitude'],
+                                lng: args['longitude'],
+                                name: args['title'],
+                                snippet: args['snippet'],
+                                isStartNavigation: true,
+                              ),
+                            );
+                            break;
+                          case Events.onCreateRoute:
+                            final args =
+                                Map<String, dynamic>.from(call.arguments);
+
+                            Navigator.pushNamed(
+                              context,
+                              Routes.routingScreen,
+                              arguments: RoutingParamsModel.fromChannelReceived(
+                                lat: args['latitude'],
+                                lng: args['longitude'],
+                                name: args['title'],
+                                snippet: args['snippet'],
+                                isStartNavigation: false,
+                              ),
+                            );
+                            break;
+                          case Events.onRecenter:
+                            // await _controller?.recenter();
+                            break;
+                          default:
+                        }
+                      },
+                    );
                   },
                   onMapClick: (point, coordinates) async {
                     _panelController.hide();
-                    setState(() {
-                      _markers = [];
-                      _nearbyMarker = [];
-                    });
+                    _removeRoutes();
+                    _clearMarker();
                     var response =
-                        await _controller?.queryRenderedFeatures(point: point);
+                        await _controller?.queryRenderedFeatures(point, [], []);
                     if (response == null || response.isEmpty) return;
                     for (var item in response) {
                       talker.good(item);
@@ -224,13 +293,46 @@ class _MapScreenState extends State<MapScreen> {
                     }
                     // talker.info(response);
                   },
-                  onMapLongClick: (point, coordinates) {
+                  onMapLongClick: (point, coordinates) async {
                     setState(() {
                       _nearbyMarker = [];
                     });
                     context
                         .read<MapBloc>()
                         .add(MapEventOnUserLongTapOnMap(coordinates));
+
+                    // var res = await VietmapApiRepositories().findRoute(
+                    //     VietMapRoutingParams(
+                    //         apiKey: AppContext.getVietmapAPIKey()!,
+                    //         vehicle: VehicleType.motorcycle,
+                    //         originPoint: LatLng(10, 106),
+                    //         destinationPoint: coordinates));
+                    // res.fold((l) {
+                    //   EasyLoading.showError('Có lỗi xảy ra');
+                    // }, (r) {
+                    //   var locs = VietmapPolylineDecoder.decodePolyline(
+                    //           r.paths!.first.points!, false)
+                    //       .map((e) {
+                    //     return LatLng(e.latitude, e.longitude);
+                    //   }).toList();
+                    //   _controller?.addPolyline(PolylineOptions(
+                    //     geometry: locs,
+                    //     polylineWidth: 4,
+                    //     polylineColor: vietmapColor,
+                    //   ));
+                    //   var bbox = r.paths?.first.bbox;
+                    //   if (bbox == null) return;
+                    //   _controller?.moveCamera(CameraUpdate.newLatLngBounds(
+                    //       LatLngBounds(
+                    //           southwest: LatLng(
+                    //               bbox[1]!.toDouble(), bbox[0]!.toDouble()),
+                    //           northeast: LatLng(
+                    //               bbox[3]!.toDouble(), bbox[2]!.toDouble())),
+                    //       left: 200,
+                    //       right: 200,
+                    //       top: 200,
+                    //       bottom: 200));
+                    // });
                   },
                 ),
                 _controller == null
@@ -277,8 +379,9 @@ class _MapScreenState extends State<MapScreen> {
                   key: const Key('searchBarKey'),
                   top: MediaQuery.of(context).viewPadding.top,
                   child: InkWell(
-                    onTap: () {
-                      Navigator.pushNamed(context, Routes.searchScreen);
+                    onTap: () async {
+                      _mapAutomotivePlugin.navigateToSearch();
+                      _navigateToSearch();
                     },
                     child: Hero(
                       tag: 'searchBar',
@@ -322,23 +425,30 @@ class _MapScreenState extends State<MapScreen> {
                       },
                     )),
                 SlidingUpPanel(
-                    isDraggable: true,
-                    controller: _panelController,
-                    maxHeight: 200,
-                    minHeight: 0,
-                    parallaxEnabled: true,
-                    parallaxOffset: .1,
-                    backdropEnabled: false,
-                    onPanelSlide: (position) {
-                      setState(() {
-                        panelPosition = position;
-                      });
+                  isDraggable: true,
+                  controller: _panelController,
+                  maxHeight: 200,
+                  minHeight: 0,
+                  parallaxEnabled: true,
+                  parallaxOffset: .1,
+                  backdropEnabled: false,
+                  onPanelSlide: (position) {
+                    setState(() {
+                      panelPosition = position;
+                    });
+                  },
+                  panelBuilder: () => BottomSheetInfo(
+                    onClose: () {
+                      _panelController.hide();
                     },
-                    panelBuilder: () => BottomSheetInfo(
-                          onClose: () {
-                            _panelController.hide();
-                          },
-                        )),
+                    onCreateRouteCallback: () {
+                      _mapAutomotivePlugin.createRoute();
+                    },
+                    onStartNavigationCallback: () {
+                      _mapAutomotivePlugin.startNavigation();
+                    },
+                  ),
+                ),
               ],
             ),
             floatingActionButton: panelPosition == 0.0
@@ -346,33 +456,46 @@ class _MapScreenState extends State<MapScreen> {
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
                       FloatingActionButton(
+                        heroTag: "recenter",
+                        backgroundColor: Colors.white,
+                        onPressed: () async {
+                          // await _controller?.recenter();
+                          await _mapAutomotivePlugin.recenter();
+                        },
+                        child: Icon(
+                          Icons.center_focus_strong,
+                          color: Colors.grey[800],
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      FloatingActionButton(
                         heroTag: "myLocation",
                         backgroundColor: Colors.white,
                         onPressed: () {
                           if (myLocationTrackingMode !=
-                              MyLocationTrackingMode.TrackingCompass) {
+                              MyLocationTrackingMode.trackingCompass) {
                             _controller?.updateMyLocationTrackingMode(
-                                MyLocationTrackingMode.TrackingCompass);
+                                MyLocationTrackingMode.trackingCompass);
                             setState(() {
                               myLocationTrackingMode =
-                                  MyLocationTrackingMode.TrackingCompass;
+                                  MyLocationTrackingMode.trackingCompass;
                               myLocationRenderMode =
-                                  MyLocationRenderMode.COMPASS;
+                                  MyLocationRenderMode.compass;
                             });
                           } else {
                             _controller?.updateMyLocationTrackingMode(
-                                MyLocationTrackingMode.TrackingGPS);
+                                MyLocationTrackingMode.trackingGps);
                             setState(() {
                               myLocationTrackingMode =
-                                  MyLocationTrackingMode.TrackingGPS;
+                                  MyLocationTrackingMode.trackingGps;
                               myLocationRenderMode =
-                                  MyLocationRenderMode.NORMAL;
+                                  MyLocationRenderMode.normal;
                             });
                           }
                         },
                         child: Icon(
                             myLocationTrackingMode ==
-                                    MyLocationTrackingMode.TrackingCompass
+                                    MyLocationTrackingMode.trackingCompass
                                 ? Icons.compass_calibration_sharp
                                 : Icons.gps_fixed,
                             color: Colors.grey[800]),
@@ -395,6 +518,21 @@ class _MapScreenState extends State<MapScreen> {
   _showPanel() {
     Future.delayed(const Duration(milliseconds: 100))
         .then((value) => _panelController.animatePanelToPosition(1.0));
+  }
+
+  _removeRoutes() async {
+    await _mapAutomotivePlugin.removeRoutes();
+  }
+
+  _navigateToSearch() async {
+    await Navigator.pushNamed(context, Routes.searchScreen);
+  }
+
+  _clearMarker() {
+    setState(() {
+      _markers = [];
+      _nearbyMarker = [];
+    });
   }
 
   _showSelectMapTilesModal() {

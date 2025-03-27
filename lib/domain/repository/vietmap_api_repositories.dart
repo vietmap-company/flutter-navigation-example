@@ -1,12 +1,14 @@
 import 'dart:io';
 
 import 'package:geolocator/geolocator.dart';
+import 'package:vietmap_flutter_navigation/vietmap_flutter_navigation.dart';
 import 'package:vietmap_map/di/app_context.dart';
 import 'package:vietmap_map/domain/entities/vietmap_routing_params.dart';
 
 import 'package:vietmap_map/data/models/vietmap_routing_model.dart';
 import 'package:vietmap_map/extension/latlng_extension.dart';
 import 'package:vietmap_map/extension/string_extension.dart';
+import 'package:vietmap_map/method_channel/vietmap_automotive_plugin.dart';
 
 import '/data/models/vietmap_place_model.dart';
 
@@ -27,6 +29,8 @@ class VietmapApiRepositories implements VietmapApiRepository {
   late Dio _dio;
   String baseUrl = AppContext.getVietmapBaseUrl() ?? 'https://api.vietmap.vn/';
   String apiKey = AppContext.getVietmapAPIKey() ?? '';
+  final VietMapAutomotivePlugin _vietMapAutomotivePlugin =
+      VietMapAutomotivePlugin.instance;
   VietmapApiRepositories() {
     _dio = Dio(BaseOptions(baseUrl: baseUrl));
 
@@ -45,15 +49,31 @@ class VietmapApiRepositories implements VietmapApiRepository {
   Future<Either<Failure, VietmapReverseModel>> getLocationFromLatLng(
       {required double lat, required double long, int? cats}) async {
     try {
-      var res = await _dio.get('reverse/v3', queryParameters: {
-        'apikey': apiKey,
-        'lat': lat,
-        'lng': long,
-        'cats': cats
-      });
-
-      if (res.statusCode == 200 && res.data.length > 0) {
-        var data = VietmapReverseModel.fromJson(res.data[0]);
+      var apiResp;
+      var distanceResponse;
+      await Future.wait(
+        [
+          _dio.get('reverse/v3', queryParameters: {
+            'apikey': apiKey,
+            'lat': lat,
+            'lng': long,
+            'cats': cats
+          }).then((value) {
+            apiResp = value;
+          }),
+          _vietMapAutomotivePlugin
+              .getDistanceToLocation(
+            location: LatLng(lat, long),
+          )
+              .then((value) {
+            distanceResponse = value;
+          }),
+        ],
+      );
+      if (apiResp.statusCode == 200 && apiResp.data.length > 0) {
+        var data = VietmapReverseModel.fromJson(apiResp.data[0]).copyWith(
+          distanceFromCurrentLocation: distanceResponse,
+        );
         return Right(data);
       } else {
         return const Left(ApiServerFailure('Có lỗi xảy ra'));

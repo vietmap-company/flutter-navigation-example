@@ -58,6 +58,7 @@ class VietmapPlaceModel extends VietmapModel {
     return data;
   }
 
+  @override
   String getAddress() {
     var data = [hsNum, street, ward, district, city];
     return data
