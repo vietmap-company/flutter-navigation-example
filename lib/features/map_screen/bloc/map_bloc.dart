@@ -54,27 +54,27 @@ class MapBloc extends Bloc<MapEvent, MapState> {
 
     await Future.wait(
       [
-        _vietMapAutomotivePlugin
-            .getDistanceToLocation(
-          location:
-              LatLng(event.coordinate.latitude, event.coordinate.longitude),
-        )
-            .then(
-          (result) {
-            distanceToLocation = result;
-          },
-        ),
-        if (event.isSendingEvent)
-          _vietMapAutomotivePlugin.addMarkers(
-            markers: [
-              VietmapMarkerModel(
-                lat: event.coordinate.latitude,
-                lng: event.coordinate.longitude,
-                title: event.placeName,
-                snippet: event.placeShortName,
-              )
-            ],
-          )
+        // _vietMapAutomotivePlugin
+        //     .getDistanceToLocation(
+        //   location:
+        //       LatLng(event.coordinate.latitude, event.coordinate.longitude),
+        // )
+        //     .then(
+        //   (result) {
+        //     distanceToLocation = result;
+        //   },
+        // ),
+        // if (event.isSendingEvent)
+        //   _vietMapAutomotivePlugin.addMarkers(
+        //     markers: [
+        //       VietmapMarkerModel(
+        //         lat: event.coordinate.latitude,
+        //         lng: event.coordinate.longitude,
+        //         title: event.placeName,
+        //         snippet: event.placeShortName,
+        //       )
+        //     ],
+        //   )
       ],
     );
     VietmapReverseModel r = VietmapReverseModel(
@@ -138,16 +138,16 @@ class MapBloc extends Bloc<MapEvent, MapState> {
         (r) async {
       emit(MapStateGetLocationFromCoordinateSuccess(r, state));
 
-      await _vietMapAutomotivePlugin.addMarkers(
-        markers: [
-          VietmapMarkerModel(
-            lat: event.coordinate.latitude,
-            lng: event.coordinate.longitude,
-            title: r.name,
-            snippet: r.address,
-          )
-        ],
-      );
+      // await _vietMapAutomotivePlugin.addMarkers(
+      //   markers: [
+      //     VietmapMarkerModel(
+      //       lat: event.coordinate.latitude,
+      //       lng: event.coordinate.longitude,
+      //       title: r.name,
+      //       snippet: r.address,
+      //     )
+      //   ],
+      // );
     });
   }
 
@@ -198,9 +198,9 @@ class MapBloc extends Bloc<MapEvent, MapState> {
             response = value;
           },
         ),
-        _vietMapAutomotivePlugin.selectSearchResult(
-          refId: event.model.refId ?? '',
-        ),
+        // _vietMapAutomotivePlugin.selectSearchResult(
+        //   refId: event.model.refId ?? '',
+        // ),
       ],
     );
     await EasyLoading.dismiss();

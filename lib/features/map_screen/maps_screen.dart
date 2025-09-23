@@ -8,6 +8,7 @@ import 'package:sliding_up_panel2/sliding_up_panel2.dart';
 import 'package:talker/talker.dart';
 import 'package:vietmap_flutter_gl/vietmap_flutter_gl.dart';
 import 'package:vietmap_gl_platform_interface/vietmap_gl_platform_interface.dart';
+import 'package:vietmap_map/extension/tilemap_extension.dart';
 import 'package:vietmap_map/features/map_screen/components/category_marker.dart';
 import 'package:vietmap_map/method_channel/vietmap_automotive_plugin.dart';
 import '../../constants/colors.dart';
@@ -95,8 +96,14 @@ class _MapScreenState extends State<MapScreen> {
           setState(() {});
         }
         if (state is MapStateChangeMapTilesSuccess) {
-          // _controller?.setStyle(
-          //     state.mapTile.getMapTiles(AppContext.getVietmapAPIKey() ?? ""));
+
+          print(
+              "Change map tiles to ${state.mapTile.getMapTiles(AppContext.getVietmapAPIKey() ?? "")}");
+          tileMap =
+              state.mapTile.getMapTiles(AppContext.getVietmapAPIKey() ?? "");
+          setState(() {});
+          _controller?.setStyle(
+              state.mapTile.getMapTiles(AppContext.getVietmapAPIKey() ?? ""));
         }
         if (state is MapStateGetLocationFromCoordinateSuccess &&
             ModalRoute.of(context)?.isCurrent == true) {
@@ -166,8 +173,6 @@ class _MapScreenState extends State<MapScreen> {
         onWillPop: () async {
           if (_panelController.isPanelShown || _panelController.isPanelOpen) {
             _panelController.hide();
-            _removeRoutes();
-            _clearMarker();
             return false;
           }
           return true;
@@ -261,36 +266,35 @@ class _MapScreenState extends State<MapScreen> {
                   },
                   onMapClick: (point, coordinates) async {
                     _panelController.hide();
-                    _removeRoutes();
                     _clearMarker();
-                    var response =
-                        await _controller?.queryRenderedFeatures(point, [], []);
-                    if (response == null || response.isEmpty) return;
-                    for (var item in response) {
-                      talker.good(item);
+                    // var response =
+                    //     await _controller?.queryRenderedFeatures(point, [], []);
+                    // if (response == null || response.isEmpty) return;
+                    // for (var item in response) {
+                    //   talker.good(item);
 
-                      String? shortName = item?['properties']?['shortname'];
-                      String? name = item?['properties']?['name'];
-                      String? prefix = item?['properties']?['prefix'];
-                      var latLng = item?['geometry']?['coordinates'];
-                      var type = item?['geometry']?['type'];
+                    //   String? shortName = item?['properties']?['shortname'];
+                    //   String? name = item?['properties']?['name'];
+                    //   String? prefix = item?['properties']?['prefix'];
+                    //   var latLng = item?['geometry']?['coordinates'];
+                    //   var type = item?['geometry']?['type'];
 
-                      if ((shortName != null || name != null) &&
-                          latLng != null) {
-                        if (!mounted) return;
-                        String? nameWithPrefix =
-                            ('${prefix ?? ''} ${name ?? ''}').trim();
-                        if (type == 'Point') {
-                          context.read<MapBloc>().add(
-                              MapEventUserClickOnMapPoint(
-                                  placeShortName: shortName ?? nameWithPrefix,
-                                  placeName: nameWithPrefix,
-                                  coordinate:
-                                      LatLng(latLng.last, latLng.first)));
-                        }
-                        break;
-                      }
-                    }
+                    //   if ((shortName != null || name != null) &&
+                    //       latLng != null) {
+                    //     if (!mounted) return;
+                    //     String? nameWithPrefix =
+                    //         ('${prefix ?? ''} ${name ?? ''}').trim();
+                    //     if (type == 'Point') {
+                    //       context.read<MapBloc>().add(
+                    //           MapEventUserClickOnMapPoint(
+                    //               placeShortName: shortName ?? nameWithPrefix,
+                    //               placeName: nameWithPrefix,
+                    //               coordinate:
+                    //                   LatLng(latLng.last, latLng.first)));
+                    //     }
+                    //     break;
+                    //   }
+                    // }
                     // talker.info(response);
                   },
                   onMapLongClick: (point, coordinates) async {
@@ -380,7 +384,7 @@ class _MapScreenState extends State<MapScreen> {
                   top: MediaQuery.of(context).viewPadding.top,
                   child: InkWell(
                     onTap: () async {
-                      _mapAutomotivePlugin.navigateToSearch();
+                      // _mapAutomotivePlugin.navigateToSearch();
                       _navigateToSearch();
                     },
                     child: Hero(
@@ -442,10 +446,10 @@ class _MapScreenState extends State<MapScreen> {
                       _panelController.hide();
                     },
                     onCreateRouteCallback: () {
-                      _mapAutomotivePlugin.createRoute();
+                      // _mapAutomotivePlugin.createRoute();
                     },
                     onStartNavigationCallback: () {
-                      _mapAutomotivePlugin.startNavigation();
+                      // _mapAutomotivePlugin.startNavigation();
                     },
                   ),
                 ),
@@ -460,7 +464,7 @@ class _MapScreenState extends State<MapScreen> {
                         backgroundColor: Colors.white,
                         onPressed: () async {
                           // await _controller?.recenter();
-                          await _mapAutomotivePlugin.recenter();
+                          // await _mapAutomotivePlugin.recenter();
                         },
                         child: Icon(
                           Icons.center_focus_strong,

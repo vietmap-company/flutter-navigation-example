@@ -4,13 +4,16 @@ import '../bloc/bloc.dart';
 import 'tile_option_item.dart';
 
 enum MapTiles {
-  vietmapVector('Vietmap vector'),
-  vietmapRaster('Vietmap raster'),
-  google('Google'),
-  googleSatellite('Google vệ tinh');
+  vietmapVector('VM lm'),
+  vietmapDarkMap('VM dm'),
+  vietmapTileMap('VM tm'),
+  vietmapRasterLM('VM RS LM'),
+  vietmapRasterDM('VM RS DM'),
+  vietmapRasterTile('VM RS TM');
 
   final String value;
   const MapTiles(this.value);
+  
 }
 
 class SelectMapTilesModal extends StatefulWidget {
@@ -54,15 +57,23 @@ class _SelectMapTilesModalState extends State<SelectMapTilesModal> {
                   currentMapType: state.mapTile,
                 ),
                 TileOptionItem(
-                  mapType: MapTiles.vietmapRaster,
+                  mapType: MapTiles.vietmapDarkMap,
                   currentMapType: state.mapTile,
                 ),
                 TileOptionItem(
-                  mapType: MapTiles.google,
+                  mapType: MapTiles.vietmapTileMap,
                   currentMapType: state.mapTile,
                 ),
                 TileOptionItem(
-                  mapType: MapTiles.googleSatellite,
+                  mapType: MapTiles.vietmapRasterLM,
+                  currentMapType: state.mapTile,
+                ),
+                TileOptionItem(
+                  mapType: MapTiles.vietmapRasterDM,
+                  currentMapType: state.mapTile,
+                ),
+                TileOptionItem(
+                  mapType: MapTiles.vietmapRasterTile,
                   currentMapType: state.mapTile,
                 ),
               ],

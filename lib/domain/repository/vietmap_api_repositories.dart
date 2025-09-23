@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:geolocator/geolocator.dart';
+import 'package:native_flutter_proxy/native_flutter_proxy.dart';
 import 'package:vietmap_flutter_navigation/vietmap_flutter_navigation.dart';
 import 'package:vietmap_map/di/app_context.dart';
 import 'package:vietmap_map/domain/entities/vietmap_routing_params.dart';
@@ -58,18 +59,19 @@ class VietmapApiRepositories implements VietmapApiRepository {
             'lat': lat,
             'lng': long,
             'cats': cats
-          }).then((value) {
+          }).then((Response value) {
             apiResp = value;
           }),
-          _vietMapAutomotivePlugin
-              .getDistanceToLocation(
-            location: LatLng(lat, long),
-          )
-              .then((value) {
-            distanceResponse = value;
-          }),
+          // _vietMapAutomotivePlugin
+          //     .getDistanceToLocation(
+          //   location: LatLng(lat, long),
+          // )
+          //     .then((value) {
+          //   distanceResponse = value;
+          // }),
         ],
       );
+
       if (apiResp.statusCode == 200 && apiResp.data.length > 0) {
         var data = VietmapReverseModel.fromJson(apiResp.data[0]).copyWith(
           distanceFromCurrentLocation: distanceResponse,
@@ -125,7 +127,6 @@ class VietmapApiRepositories implements VietmapApiRepository {
         'text': keySearch,
         'focus': location.toLatLng().toUrlValue()
       });
-
       if (res.statusCode == 200) {
         var data = List<VietmapAutocompleteModel>.from(
             res.data.map((e) => VietmapAutocompleteModel.fromJson(e)));

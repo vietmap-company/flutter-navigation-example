@@ -58,9 +58,9 @@
 	<key>VietMapAPIBaseURL</key>
 	<string>https://maps.vietmap.vn/api/navigations/route/</string>
 	<key>VietMapAccessToken</key>
-	<string>YOUR_API_KEY_HERE</string>
+	<string>07898da8410ac45ca5706a51601a1dcecc90b71718b09c40</string>
 	<key>VietMapURL</key>
-	<string>https://maps.vietmap.vn/api/maps/light/styles.json?apikey=YOUR_API_KEY_HERE</string>
+	<string>https://maps.vietmap.vn/api/maps/light/styles.json?apikey=07898da8410ac45ca5706a51601a1dcecc90b71718b09c40</string>
 	<key>com.apple.security.network.client</key>
 	<true/>
 </dict>

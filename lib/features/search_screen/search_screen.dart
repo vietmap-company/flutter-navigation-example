@@ -73,7 +73,7 @@ class _SearchScreenState extends State<SearchScreen> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
-        await _vietMapAutomotivePlugin.closeSearch();
+        // await  _vietMapAutomotivePlugin.closeSearch();
         return true;
       },
       child: GestureDetector(
@@ -100,8 +100,8 @@ class _SearchScreenState extends State<SearchScreen> {
                       controller: _searchController,
                       onChanged: (value) {
                         if (value.isNotEmpty && value.length >= 2) {
-                          _vietMapAutomotivePlugin.queryTextUpdated(
-                              query: value);
+                          // _vietMapAutomotivePlugin.queryTextUpdated(
+                              // query: value);
                           _debounce.run(() {
                             context
                                 .read<MapBloc>()
@@ -122,7 +122,7 @@ class _SearchScreenState extends State<SearchScreen> {
                               borderSide: const BorderSide(color: Colors.grey)),
                           prefixIcon: InkWell(
                             onTap: () {
-                              _vietMapAutomotivePlugin.closeSearch();
+                              // _vietMapAutomotivePlugin.closeSearch();
                               Navigator.pop(context);
                             },
                             child: const Icon(

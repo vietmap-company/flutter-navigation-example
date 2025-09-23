@@ -125,7 +125,7 @@ class _RoutingScreenState extends State<RoutingScreen> {
                               child: const Text('Không')),
                           TextButton(
                               onPressed: () {
-                                _vietmapAutomotivePlugin.stopNavigation();
+                                // _vietmapAutomotivePlugin.stopNavigation();
                                 _navigationController?.finishNavigation();
                                 _onStopNavigation();
                                 Navigator.pop(context);
@@ -135,7 +135,7 @@ class _RoutingScreenState extends State<RoutingScreen> {
                       ));
               return Future.value(false);
             }
-            _vietmapAutomotivePlugin.stopNavigation();
+            // _vietMapAutomotivePlugin.stopNavigation();
             routingBloc.add(RoutingEventClearDirection());
             return Future.value(true);
           },
@@ -153,7 +153,7 @@ class _RoutingScreenState extends State<RoutingScreen> {
                         });
                       },
                       onBackButtonTapCallback: () {
-                        _vietmapAutomotivePlugin.stopNavigation();
+                        // _vietMapAutomotivePlugin.stopNavigation();
                       },
                       onDestinationTapCallback: () => setState(() {
                         isFromOrigin = false;
@@ -304,14 +304,14 @@ class _RoutingScreenState extends State<RoutingScreen> {
                             child: VietmapBottomActionView(
                                 controller: _navigationController,
                                 onStopNavigationCallback: () {
-                                  _vietmapAutomotivePlugin.cancelNavigation();
+                                  // _vietMapAutomotivePlugin.cancelNavigation();
                                   setState(() {
                                     _isRunning = false;
                                   });
                                 },
                                 routeProgressEvent: routeProgressEvent,
                                 onOverviewCallback: () {
-                                  _vietmapAutomotivePlugin.overview();
+                                  // _vietMapAutomotivePlugin.overview();
                                   _showRecenterButton();
                                 },
                                 recenterButton: recenterButton),
@@ -339,7 +339,7 @@ class _RoutingScreenState extends State<RoutingScreen> {
                                   },
                                   panelPosition: panelPosition,
                                   onStartNavigation: () {
-                                    _vietmapAutomotivePlugin.startNavigation();
+                                    // _vietMapAutomotivePlugin.startNavigation();
                                     _navigationController?.startNavigation();
                                     setState(() {
                                       _isRunning = true;
@@ -366,7 +366,7 @@ class _RoutingScreenState extends State<RoutingScreen> {
         })),
         onPressed: () {
           _navigationController?.recenter();
-          _vietmapAutomotivePlugin.recenter();
+          // _vietMapAutomotivePlugin.recenter();
           recenterButton = const SizedBox.shrink();
         },
         child: Container(

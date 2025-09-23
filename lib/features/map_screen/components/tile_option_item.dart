@@ -46,6 +46,11 @@ class TileOptionItem extends StatelessWidget {
   }
 
   getMapTypeOptionsImage(MapTiles mapType) {
+    return Image.asset(
+      'assets/images/vietmap_vector.png',
+      width: 60,
+      height: 60,
+    );
     switch (mapType) {
       case MapTiles.vietmapVector:
         return Image.asset(
@@ -53,21 +58,27 @@ class TileOptionItem extends StatelessWidget {
           width: 60,
           height: 60,
         );
-      case MapTiles.vietmapRaster:
+      case MapTiles.vietmapDarkMap:
         return Image.asset(
           'assets/images/vietmap_raster.png',
           width: 60,
           height: 60,
         );
-      case MapTiles.google:
+      case MapTiles.vietmapTileMap:
         return Image.asset(
           'assets/images/google.png',
           width: 60,
           height: 60,
         );
-      case MapTiles.googleSatellite:
+      case MapTiles.vietmapRasterLM:
         return Image.asset(
           'assets/images/google_satellite.png',
+          width: 60,
+          height: 60,
+        );
+      default:
+        return Image.asset(
+          'assets/images/vietmap_raster.png',
           width: 60,
           height: 60,
         );
